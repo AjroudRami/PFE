@@ -1,0 +1,3 @@
+[submodule "kobdig"]
+	path = kobdig
+	url = https://github.com/tettaman/kobdig.git
