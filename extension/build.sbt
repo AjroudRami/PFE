@@ -1,5 +1,3 @@
-import org.nlogo.build.NetLogoExtension.Target
-
 enablePlugins(org.nlogo.build.NetLogoExtension)
 
 netLogoExtName      := "dbi_agents"
