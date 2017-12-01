@@ -8,6 +8,7 @@ public class FirstIntegers implements Reporter {
         return SyntaxJ.reporterSyntax(
                 new int[] {Syntax.NumberType()}, Syntax.ListType());
     }
+
     public Object report(Argument args[], Context context)
             throws ExtensionException {
         // create a NetLogo list for the result
