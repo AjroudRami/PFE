@@ -27,6 +27,11 @@ to setup
   ;;create-turtles 100 [setxy random-xcor random-ycor]
   setupLandscapeType
   setupClimatique
+  setupLandOwners
+  setupExploitationPerOwners
+  setupSymbolic
+  setupAgricultureStructure
+  setupYearsOfExploitation
   reset-ticks
 end
 
@@ -60,6 +65,7 @@ to setupClimatique
 
   ask patches [
     set climat clim
+    set exploited false
     set production (item climat(item landscapeType climatique-data))
     ]
 end
@@ -69,7 +75,7 @@ to setupcolorlandscape
 end
 
 to setupLandOwners
-  create-owners random(5)
+  create-owners (random(5) + 3)
   ask owners [
     set rank one-of ["farmers" "rich" "aristocrat"]
     setupmoney
@@ -83,40 +89,72 @@ to setupmoney
 end
 
 to setupExploitationPerOwners
-  ifelse rank = "farmers" [ set numberOfExploitation random(2)]
-  [ifelse rank = "rich" [set numberOfExploitation random(4)]
-    [set numberOfExploitation random(7)]]
   ask owners [
-  ;;foreach dbi_agents:first-n-integers numberOfExploitation [create-exploitation who]
+  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
+  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
+  [set numberOfExploitation (random(7) + 1)]]
+
+  repeat numberOfExploitation [create-exploitation who]
   ]
 
  end
 
 to create-exploitation [lOwner]
+
+  ;A améliorer pour prendre + de terrains autour de chaque exploitation
+
   let created false
   while [ not created ]
-  [ let x random-xcor
+  [
+    let x random-xcor
     let y random-ycor
-    if not [exploited] of patch-at x y [
-      ask patch-at x y [set exploited true]
-      sprout-exploitations 1 [
+      ask patch-at x y [
+      ifelse exploited = false [
+        set exploited true
+        set created true
+        sprout-exploitations 1 [
         set landowner lOwner
         set shape "house"
         set typeOfExploitation 0
-        set listofpatches patch-at x y
+        set listofpatches (list patch x y)
         set symbolicvalue random(4)
         set totalproduction 0
         set sizeofland 1
         set totalaccesibility 0
+          ;ask patch x y [set pcolor black]
       ]
-      set created true
+      ][]
   ]
   ]
 end
 
+to setupSymbolic
+  ask exploitations[
+    set symbolicvalue random(4)
+    ;;if near capital set symbolivalue symbolicvalue +1
+  ]
+end
+
+to setupAgricultureStructure
+  ask exploitations[
+    let x random(100)
+    if x < 50 [ foreach listofpatches [set yearsExploited true]
+    ]
+  ]
+end
+
+to setupYearsOfExploitation
+  ask exploitations[
+    let x random(100)
+    foreach listofpatches [set yearsExploited x]
+  ]
+end
+
+
+
 to impactYearsExploitation
   let impact matrix:from-row-list [0 -10 -20 -10 -20]
-  set production (production + matrix:get impact 0 yearsExploited)
+  set production production + ((yearsExploited / 5) * matrix:get impact 0 landscapetype)
 end
 
 to impactAgriculturalStructure
