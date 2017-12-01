@@ -1,27 +1,34 @@
 extensions[matrix dbi_agents]
 
+globals[
+  ;Conteneur des donnees issus des fichiers
+  climatique-data
+]
+
 
 breed [owners owner]
 breed [exploitations exploitation]
+breed [landscapeunits landscapeunit]
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
 owners-own [rank money oldmoney radius numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
-
+;;LandscapeUnits
+landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
 patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat]
 ;; agrological power : % d'influence des conditions climatiques
 exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility]
 
-
+to clear
+  ca
+end
 
 to setup
-  ca
   ;;create-turtles 100 [setxy random-xcor random-ycor]
   setupLandscapeType
   setupClimatique
-
+  reset-ticks
 end
-
 
 to go
   if (ticks >= 300) [stop]
@@ -40,20 +47,20 @@ to setupLandscapeType
 end
 
 to setupClimatique
-  let m1 matrix:from-row-list [
-    ;; Optimal - Hot&Humid - Hot&dRY - Cold&Humid - Cold&Dry
-    [100 50 70 20 40] ;;alumnial
-    [100 70 30 40 30] ;; Foothills
-    [50 35 10 20 10] ;; Plateaux
-    [75 22.5 45 15 30] ;; Seidmentary Basin
-    [25 2.5 5 2.5 5] ;; Hillslopes
-  ]
+;  let m1 matrix:from-row-list [
+;     Optimal - Hot&Humid - Hot&dRY - Cold&Humid - Cold&Dry
+;   [100 50 70 20 40] ;;alumnial
+;   [100 70 30 40 30] ;; Foothills
+;   [50 35 10 20 10] ;; Plateaux
+;   [75 22.5 45 15 30] ;; Seidmentary Basin
+;   [25 2.5 5 2.5 5] ;; Hillslopes
+;  ]
 
   let clim random(5)
 
   ask patches [
     set climat clim
-    set production matrix:get m1 landscapeType climat
+    set production (item climat(item landscapeType climatique-data))
     ]
 end
 
@@ -80,7 +87,7 @@ to setupExploitationPerOwners
   [ifelse rank = "rich" [set numberOfExploitation random(4)]
     [set numberOfExploitation random(7)]]
   ask owners [
-  foreach dbi_agents:first-n-integers numberOfExploitation [create-exploitation who]
+  ;;foreach dbi_agents:first-n-integers numberOfExploitation [create-exploitation who]
   ]
 
  end
@@ -114,6 +121,20 @@ end
 
 to impactAgriculturalStructure
   if haveTools [set production production + 20]
+end
+
+to load-climatique
+  let file user-file
+
+  if(file != false)
+  [
+    set climatique-data []
+    file-open file
+    while [ not file-at-end? ]
+    [set climatique-data sentence climatique-data (list (list file-read file-read file-read file-read file-read))]
+   ]
+     user-message "Climatique load complete..."
+     file-close
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -161,12 +182,46 @@ NIL
 1
 
 BUTTON
-85
-141
-148
-174
+75
+90
+138
+123
 NIL
 go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
+
+BUTTON
+41
+143
+184
+176
+NIL
+load-climatique
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+74
+11
+137
+44
+NIL
+clear
 NIL
 1
 T
@@ -181,6 +236,45 @@ NIL
 ## WHAT IS IT?
 
 (a general understanding of what the model is trying to show or explain)
+
+## ENTITY DETAILS
+
+* **Landowners** _(Turtle breed : owners)_
+    * **rank :** Rang social (Farmier/Riche/Aristocrate)
+    * **money :** Pouvoir économique de départ
+    * **oldmoney :** Revenu à t-1
+    * **radius :** Rayon de recherche de nouvelle exploitation en fonction du rang
+    * **numberOfExploitation :** Nombre d'exploitation actuelle
+    * **listExploitation :** Liste contenant les exploitations
+    * **landproductivity :** Total de production de toutes les exploitations
+    * **landmanagement :** % d'impact sur l'owner concernant les aménagements établie d'un terrain 
+    * **macrocontext :** % d'influence du macro-eco-context sur l'owner
+  
+* **Landscape Unit** _(Turtle breed : landscapeunits)_
+    * **location :** Contient tout les patchs étant de ce type d'unité
+    * **agrologicalpower2 :** Contient le pouvoir agricole de cette unité
+    * **name :** Contient le nom de l'unité  	
+
+* **Piece of land** _(Patches)_
+    * **landscapeType :** Type de terrain
+    * **haveTools :** Boolean -> true si il y a des aménagement agricole, false sinon
+    * **agrologicalPower :** Pouvoir agricole du terrain dépend du landscapeType
+    * **exploited :** Boolean -> true si appartient à une exploitation non abandonnée, false sinon
+    * **yearsExploited :** Nombre d'années consécutive exploité
+    * **production :** Total de production fourni par ce terrain
+    * **accessibility:** Valeur représentant l'accesibilité de ce terrain
+    * **climat:** Climat touchant le terrain representé par une valeur (voir tab climatique)
+
+  * **Exploitation** _(Turtle breed : exploitations)_
+    * **landowner :** Nom de l'owner de l'exploitation
+    * **typeOfExploitation :** Ferme/Villa
+    * **listofpatches :** Liste des pieces of lands representant le terrain de l'exploitation
+    * **symbolicvalue :** Valeurs symbolique comprise dans l'intervalle [0,4].
+    * **totalproduction :** Somme des production de chaque piece of land appartenant à l'exploitation
+    * **sizeofland :** Nombre de piece of lands contenus dans l'exploitation
+    * **totalaccesibility :** Somme de l'accessibilité de chaque piece of land contenus dans l'exploitation
+
+* **Town**
 
 ## HOW IT WORKS
 
@@ -522,6 +616,12 @@ Polygon -7500403 true true 30 75 75 30 270 225 225 270
 NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
+1.0
+    org.nlogo.sdm.gui.AggregateDrawing 2
+        org.nlogo.sdm.gui.ConverterFigure "attributes" "attributes" 1 "FillColor" "Color" 130 188 183 99 110 50 50
+            org.nlogo.sdm.gui.WrappedConverter "" ""
+        org.nlogo.sdm.gui.StockFigure "attributes" "attributes" 1 "FillColor" "Color" 225 225 182 299 178 60 40
+            org.nlogo.sdm.gui.WrappedStock "" "" 0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
