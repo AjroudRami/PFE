@@ -24,6 +24,7 @@ hs_err_pid*
 extension/project/target/
 
 extension/project/project/target/
-extension/.idea/*
+extension/.idea/
+.iml
 .idea
 
