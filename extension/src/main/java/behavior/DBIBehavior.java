@@ -1,5 +1,7 @@
 package behavior;
 
+import kobdig.agent.Agent;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -7,6 +9,12 @@ import java.io.IOException;
  * Represent a behavior based on the Desire, Belief, Intention model
  */
 public class DBIBehavior implements Behavior, Importable, Savable {
+
+    private Agent agent;
+
+    public DBIBehavior(Agent agent) {
+        this.agent = agent;
+    }
 
     @Override
     public void acknowledge(FactSet set) {
