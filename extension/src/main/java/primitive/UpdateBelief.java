@@ -1,24 +1,24 @@
 package primitive;
 
-import behavior.DBIBehavior;
-import behavior.Fact;
+import kobdig.agent.Fact;
 import kobdig.logic.TruthDegree;
-import org.nlogo.api.Argument;
-import org.nlogo.api.Command;
-import org.nlogo.api.Context;
-import org.nlogo.api.ExtensionException;
+import org.nlogo.api.*;
 import org.nlogo.core.Syntax;
+import org.nlogo.core.SyntaxJ;
 
 public class UpdateBelief implements Command {
+
     @Override
     public void perform(Argument[] args, Context context) throws ExtensionException {
-        DBIBehavior behavior = (DBIBehavior) args[0].get();
-        Fact fact = (Fact) args[1].get();
-        TruthDegree truthDegree = (TruthDegree) args[2].get();
+        Agent agent = context.getAgent();
+        kobdig.agent.Agent dbi = (kobdig.agent.Agent) agent.getVariable(0);
+        Fact fact = (Fact) args[0].get();
+        TruthDegree truthDegree = new TruthDegree(args[1].getDoubleValue());
+        dbi.updateBeliefs(fact, truthDegree);
     }
 
     @Override
     public Syntax getSyntax() {
-        return null;
+        return SyntaxJ.commandSyntax(new int[]{Syntax.ReferenceType(), Syntax.NumberType()});
     }
 }
