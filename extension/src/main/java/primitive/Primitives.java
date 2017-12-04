@@ -17,4 +17,13 @@ public class Primitives {
     public static final String GET_FACT_BELIEF_FACTOR = "get-fact-belief-factor";
     public static final String CREATE_ATOM = "create-atom";
     public static final String CREATE_PROPOSITION = "create-proposition";
+    public static final String CREATE_FACT_FROM_FORMULA = "create-fact-from-formula";
+    public static final String CREATE_FORMULA = "create-formula";
+    public static final String CREATE_FORMULA_FROM_ATOM = "create-formula-from-atom";
+    public static final String CREATE_OPERATOR = "operator";
+    public static final String CREATE_PROPOSITIONAL_FORMULA = "create-propositional-formula";
+    public static final String CREATE_PROPOSITIONAL_ATOM = "create-propositional-atom";
+    public static final String SET_DBI_BEHAVIOR = "set-dbi-behavior";
+    public static final String CREATE_EMPTY_DBI = "create-empty-dbi";
+
 }
