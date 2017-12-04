@@ -9,9 +9,10 @@ globals[
 breed [owners owner]
 breed [exploitations exploitation]
 breed [landscapeunits landscapeunit]
+breed [towns town]
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank money oldmoney radius numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
+owners-own [rank ecopower money oldmoney radius numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -19,33 +20,56 @@ patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited p
 ;; agrological power : % d'influence des conditions climatiques
 exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility]
 
+
 to clear
   ca
 end
 
 to setup
   ;;create-turtles 100 [setxy random-xcor random-ycor]
+
   setupLandscapeType
   setupClimatique
+  setupTown
   setupLandOwners
   setupExploitationPerOwners
   setupSymbolic
   setupAgricultureStructure
   setupYearsOfExploitation
+  randomEcoPowerOwners
+
   reset-ticks
 end
 
 to go
   if (ticks >= 300) [stop]
-
-
+  stuffBeforeOwnersCalcul
+  ask patches [
+    ifelse exploited [set yearsExploited (yearsExploited + 1)]
+    [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
+  ]
   tick
 end
 
 
+;;; All needed T0 functions
+
+to setupTown
+  create-towns 1 [
+    set color black
+    setxy random-xcor random-ycor
+    set shape "flag"
+    let x (patch-set patch-here neighbors)
+    ask x[
+      set pcolor white
+      set exploited true
+    ]
+  ]
+end
 
 to setupLandscapeType
   ask patches [
+    set haveTools false
     set landscapeType random(5)
     setupcolorlandscape
   ]
@@ -66,7 +90,7 @@ to setupClimatique
   ask patches [
     set climat clim
     set exploited false
-    set production (item climat(item landscapeType climatique-data))
+    set agrologicalPower (item climat(item landscapeType climatique-data))
     ]
 end
 
@@ -79,6 +103,7 @@ to setupLandOwners
   ask owners [
     set rank one-of ["farmers" "rich" "aristocrat"]
     setupmoney
+    set listExploitation []
   ]
 end
 
@@ -116,12 +141,15 @@ to create-exploitation [lOwner]
         set landowner lOwner
         set shape "house"
         set typeOfExploitation 0
-        set listofpatches (list patch x y)
+        set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set totalproduction 0
         set sizeofland 1
         set totalaccesibility 0
-          ;ask patch x y [set pcolor black]
+          ask patch x y [set pcolor black]
+        ask owner lOwner [
+            set listExploitation lput myself listExploitation
+        ]
       ]
       ][]
   ]
@@ -145,7 +173,7 @@ end
 
 to setupYearsOfExploitation
   ask exploitations[
-    let x random(100)
+    let x random(10)
     foreach listofpatches [set yearsExploited x]
   ]
 end
@@ -153,8 +181,8 @@ end
 
 
 to impactYearsExploitation
-  let impact matrix:from-row-list [0 -10 -20 -10 -20]
-  set production production + ((yearsExploited / 5) * matrix:get impact 0 landscapetype)
+  let impact (list 0 -10 -20 -10 -20)
+  set production production + (round(yearsExploited / 5) * (item landscapetype impact))
 end
 
 to impactAgriculturalStructure
@@ -162,8 +190,9 @@ to impactAgriculturalStructure
 end
 
 to load-climatique
-  let file user-file
 
+  ;let file user-file
+let file "climatique.txt"
   if(file != false)
   [
     set climatique-data []
@@ -174,6 +203,71 @@ to load-climatique
      user-message "Climatique load complete..."
      file-close
 end
+
+
+;; Starting T1 functions
+
+to randomEcoPowerOwners
+ask owners[
+   set oldmoney money
+   let p random(3)
+    ifelse p = 0 [ set money (money - 50) ]
+    [if p = 1 [set money (money + 50)] ]
+      ;; 2 does nothing
+  ]
+end
+
+to stuffBeforeOwnersCalcul
+
+
+  ask patches[
+    set production agrologicalPower
+    impactAgriculturalStructure
+    impactYearsExploitation
+    ;; T1 : 15
+    if exploited [set accessibility distance one-of towns]
+  ]
+
+  ask exploitations[
+    ;;T1 : 14
+    set totalproduction (sum [production] of  (patch-set listofpatches))
+    ;; T1 : 16 != 17 -> On calcule la distance par rapport à la CAPITALE et non plus aux villes
+    set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
+  ]
+
+ ask owners [
+    set oldmoney money
+    set ecopower (oldmoney - money)
+    set money (sum [(2 * totalproduction) - totalaccesibility] of turtle-set listExploitation)
+  ]
+
+  ;;T1 : 19
+  let freepol patches with [exploited = false]
+
+ calculHigherEqualLowerProfit
+
+end
+
+to calculHigherEqualLowerProfit
+  ask owners [
+    ifelse rank = "aristocrats" [ cmd1]
+    [ifelse rank = "rich" [cmd2]
+    [cmd3]] ;;farmers
+  ]
+end
+
+to cmd1 ;aristocrats
+
+end
+
+to cmd2 ;rich
+
+end
+
+to cmd3 ; farmers
+
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -189,8 +283,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -16
 16
@@ -654,12 +748,6 @@ Polygon -7500403 true true 30 75 75 30 270 225 225 270
 NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
-1.0
-    org.nlogo.sdm.gui.AggregateDrawing 2
-        org.nlogo.sdm.gui.ConverterFigure "attributes" "attributes" 1 "FillColor" "Color" 130 188 183 99 110 50 50
-            org.nlogo.sdm.gui.WrappedConverter "" ""
-        org.nlogo.sdm.gui.StockFigure "attributes" "attributes" 1 "FillColor" "Color" 225 225 182 299 178 60 40
-            org.nlogo.sdm.gui.WrappedStock "" "" 0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
