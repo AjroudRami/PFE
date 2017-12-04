@@ -33,7 +33,7 @@ public class CreateOperator implements Reporter {
             case "AND":
                 return Operator.AND;
             case "OR":
-                return Operator.AND;
+                return Operator.OR;
             case "NOT":
                 return Operator.NOT;
             case "XOR":
