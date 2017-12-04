@@ -1,19 +1,21 @@
 package primitive;
 
-import org.nlogo.api.Argument;
-import org.nlogo.api.Context;
-import org.nlogo.api.ExtensionException;
-import org.nlogo.api.Reporter;
+import kobdig.agent.Fact;
+import org.nlogo.api.*;
 import org.nlogo.core.Syntax;
+import org.nlogo.core.SyntaxJ;
 
 public class GetFactBeliefFactor implements Reporter {
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        return null;
+        Fact fact = (Fact) args[0].get();
+        Agent agent = context.getAgent();
+        kobdig.agent.Agent dbi = (kobdig.agent.Agent) agent.getVariable(0);
+        return dbi.believes(fact).doubleValue();
     }
 
     @Override
     public Syntax getSyntax() {
-        return null;
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.NumberType());
     }
 }
