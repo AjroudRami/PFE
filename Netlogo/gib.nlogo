@@ -15,7 +15,7 @@ breed [landscapeunits landscapeunit]
 breed [towns town]
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -115,6 +115,9 @@ to setupLandOwners
   ask owners [
     set rank item 2 ["farmers" "rich" "aristocrat"]
     set radius 10
+    ;TODO A changer
+    set maxNumberExploit 6
+    set numberOfExploitation 0
     set listExploitation []
   ]
 end
@@ -129,7 +132,7 @@ to setupExploitationPerOwners
   ask owners [
   ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
   [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
-  [set numberOfExploitation (random(7) + 1)]]
+  [set numberOfExploitation (random(4) + 1)]]
 
   repeat numberOfExploitation [create-exploitation who]
   ]
@@ -155,6 +158,7 @@ to create-exploitation [lOwner]
         set typeOfExploitation 0
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
+        set color [color] of owner landowner
         set totalproduction 0
         set sizeofland 1
         set notRentable 0
@@ -192,7 +196,7 @@ to setupYearsOfExploitation
 end
 
 
-
+;;Utils
 to impactYearsExploitation
   let impact (list 0 -10 -20 -10 -20)
   set production production + (round(yearsExploited / 5) * (item landscapetype impact))
@@ -261,6 +265,8 @@ to stuffBeforeOwnersCalcul
 
 end
 
+
+;;Fonctions nécessaire au gros tableaux du ODD
 to maintain
 end
 
@@ -268,23 +274,33 @@ to improve
 
 end
 
+;;Fonction qui fait en sorte que les patchs soient contigus
 to grow-cluster
 
   ask neighbors4 with [(cluster = nobody) and (exploited = false)]
   [ set cluster [cluster] of myself
     set exploited true
-    set pcolor black ;[color] of [landowner] of myself
+    set pcolor [pcolor] of myself ;[color] of [landowner] of myself
   ]
 end
 
-to abandon
-  let probablygood patches in-radius ([radius] of myself)
-  let terrain max-n-of 5 probablygood with [exploited = false] [production]
-  let startcluster one-of terrain
+;;Si le profit de la nouvelle exploitation est Haut alors en crée jusqu'au max
+to chooseRentableExploitationAndExpand
+
+  ;Necessary to loop
   let nameOwner [landowner] of self
+  let goodprofit 0
+  let numb [numberOfExploitation] of myself
+  let maxn [maxNumberExploit] of myself
+  ;;Necessary to enlarge terrain
+  let watchTerrain 2
+  let probablygood patches in-radius ([radius] of myself) with [exploited = false]
+  let terrain max-n-of watchTerrain probablygood [production]
+  let startcluster one-of terrain
   ask startcluster [
     set cluster self
     set exploited true
+    set pcolor [color] of owner nameOwner
     grow-cluster]
   ;foreach terrain [set exploited true]
    ask startcluster [
@@ -297,23 +313,40 @@ to abandon
         set totalproduction 0
         set sizeofland 1
         set notRentable 0
+        set color [color] of owner landowner
         set totalaccesibility 0
         let blux  sort (patches with [cluster = startcluster])
         if blux != 0 [set listofpatches sentence listofpatches blux]
-          ask patch-here [set pcolor black]
+
+        set totalproduction (sum [production] of  (patch-set listofpatches))
+        set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
+        set goodprofit (totalproduction - totalaccesibility)
+        ask patch-here [set pcolor black]
         ask owner nameOwner [
             set listExploitation lput myself listExploitation
+            set numberOfExploitation numberOfExploitation + 1
         ]
       ]
   ]
+  if (goodprofit > profit) and (numb < maxn)  [chooseRentableExploitationAndExpand]
+end
+
+;;Si on abandonne une exploitation Alors on en crée une autre
+;;dans le rayon d'action par rapport à son ancienne exploitation
+;;puis on tue l'exploitation courante (non rentable)
+to abandon
+  let nameOwner [landowner] of self
+  let maxn [maxNumberExploit] of myself
+  let numb [numberOfExploitation] of myself
+
+   chooseRentableExploitationAndExpand
+
+
   ask owner nameOwner [
     set listExploitation (remove myself listExploitation)
    ]
 
-
  ask (patch-set listofpatches) [
-
-
     set pcolor (15 + (landscapeType * 20))
     set exploited false
     set cluster nobody ]
@@ -321,7 +354,20 @@ to abandon
   die ;; tue l'exploitation non rentable
 end
 
-to Enlarge
+to enlarge
+  let watchTerrain 2
+  let probablygood  (patch-set [neighbors4] of (patch-set listofpatches) ) with [exploited = false]
+  if (count probablygood >= watchTerrain) [
+    let terrain max-n-of watchTerrain probablygood [production]
+  let startcluster one-of terrain
+  ask startcluster [
+    set cluster self
+    set exploited true
+    set pcolor [color] of myself
+    grow-cluster
+    let blux  sort (patches with [cluster = startcluster])
+    if blux != 0 [ask myself[set listofpatches sentence listofpatches blux]]]
+  ]
 
 end
 
@@ -349,7 +395,7 @@ to cmd3 ; farmers
 
 end
 
-
+;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
 to checkProfitDecreased
   foreach listExploitation [
     [exploit] -> ask exploit [
@@ -371,7 +417,19 @@ to checkProfitEquivalent
 end
 
 to checkProfitIncreased
+   foreach listExploitation [
+    [exploit] -> ask exploit [
+      ifelse (totalproduction - totalaccesibility) < profit [ maintain addStructure]
+      [ enlarge]
+    ]
+  ]
+end
 
+to addStructure
+  let setpatch (patch-set listofpatches)
+  ask setpatch [
+    set haveTools true
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
