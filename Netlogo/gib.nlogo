@@ -1,8 +1,11 @@
-extensions[matrix dbi_agents]
+extensions[matrix]
 
 globals[
   ;Conteneur des donnees issus des fichiers
   climatique-data
+
+  ;valeur qui délimite High Profit from Low Profit
+  profit
 ]
 
 
@@ -16,9 +19,9 @@ owners-own [rank ecopower money oldmoney radius numberOfExploitation listExploit
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
-patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat]
+patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster]
 ;; agrological power : % d'influence des conditions climatiques
-exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility]
+exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility notRentable]
 
 
 to clear
@@ -27,8 +30,9 @@ end
 
 to setup
   ;;create-turtles 100 [setxy random-xcor random-ycor]
-
+  set profit 20
   setupLandscapeType
+  setupcolorlandscape
   setupClimatique
   setupTown
   setupLandOwners
@@ -37,6 +41,7 @@ to setup
   setupAgricultureStructure
   setupYearsOfExploitation
   randomEcoPowerOwners
+
 
   reset-ticks
 end
@@ -48,6 +53,7 @@ to go
     ifelse exploited [set yearsExploited (yearsExploited + 1)]
     [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
   ]
+  calculHigherEqualLowerProfit
   tick
 end
 
@@ -71,8 +77,12 @@ to setupLandscapeType
   ask patches [
     set haveTools false
     set landscapeType random(5)
-    setupcolorlandscape
+    set cluster nobody
   ]
+
+  repeat 50
+  [ ask patches
+    [ set landscapeType [landscapeType] of one-of neighbors4 ] ]
 end
 
 to setupClimatique
@@ -95,14 +105,16 @@ to setupClimatique
 end
 
 to setupcolorlandscape
-  set pcolor (15 + (landscapeType * 20))
+  ask patches[
+    set pcolor (15 + (landscapeType * 20))
+  ]
 end
 
 to setupLandOwners
-  create-owners (random(5) + 3)
+  create-owners (5)
   ask owners [
-    set rank one-of ["farmers" "rich" "aristocrat"]
-    setupmoney
+    set rank item 2 ["farmers" "rich" "aristocrat"]
+    set radius 10
     set listExploitation []
   ]
 end
@@ -145,6 +157,7 @@ to create-exploitation [lOwner]
         set symbolicvalue random(4)
         set totalproduction 0
         set sizeofland 1
+        set notRentable 0
         set totalaccesibility 0
           ask patch x y [set pcolor black]
         ask owner lOwner [
@@ -200,7 +213,7 @@ let file "climatique.txt"
     while [ not file-at-end? ]
     [set climatique-data sentence climatique-data (list (list file-read file-read file-read file-read file-read))]
    ]
-     user-message "Climatique load complete..."
+     ;user-message "Climatique load complete..."
      file-close
 end
 
@@ -244,20 +257,88 @@ to stuffBeforeOwnersCalcul
   ;;T1 : 19
   let freepol patches with [exploited = false]
 
- calculHigherEqualLowerProfit
+
+
+end
+
+to maintain
+end
+
+to improve
+
+end
+
+to grow-cluster
+
+  ask neighbors4 with [(cluster = nobody) and (exploited = false)]
+  [ set cluster [cluster] of myself
+    set exploited true
+    set pcolor black ;[color] of [landowner] of myself
+  ]
+end
+
+to abandon
+  let probablygood patches in-radius ([radius] of myself)
+  let terrain max-n-of 5 probablygood with [exploited = false] [production]
+  let startcluster one-of terrain
+  let nameOwner [landowner] of self
+  ask startcluster [
+    set cluster self
+    set exploited true
+    grow-cluster]
+  ;foreach terrain [set exploited true]
+   ask startcluster [
+        sprout-exploitations 1 [
+      set landowner nameOwner
+        set shape "house"
+        set typeOfExploitation 0
+        set listofpatches (list patch-here)
+        set symbolicvalue random(4)
+        set totalproduction 0
+        set sizeofland 1
+        set notRentable 0
+        set totalaccesibility 0
+        let blux  sort (patches with [cluster = startcluster])
+        if blux != 0 [set listofpatches sentence listofpatches blux]
+          ask patch-here [set pcolor black]
+        ask owner nameOwner [
+            set listExploitation lput myself listExploitation
+        ]
+      ]
+  ]
+  ask owner nameOwner [
+    set listExploitation (remove myself listExploitation)
+   ]
+
+
+ ask (patch-set listofpatches) [
+
+
+    set pcolor (15 + (landscapeType * 20))
+    set exploited false
+    set cluster nobody ]
+
+  die ;; tue l'exploitation non rentable
+end
+
+to Enlarge
 
 end
 
 to calculHigherEqualLowerProfit
   ask owners [
-    ifelse rank = "aristocrats" [ cmd1]
+
+    ifelse rank = "aristocrat" [ cmd1 ]
     [ifelse rank = "rich" [cmd2]
     [cmd3]] ;;farmers
   ]
 end
 
-to cmd1 ;aristocrats
-
+to cmd1 ;aristocrats money = profit (ODD)
+  ifelse money < oldmoney [checkProfitDecreased ]
+  [ ifelse money > oldmoney [checkProfitIncreased ]
+    [checkProfitEquivalent ]
+  ]
 end
 
 to cmd2 ;rich
@@ -268,6 +349,30 @@ to cmd3 ; farmers
 
 end
 
+
+to checkProfitDecreased
+  foreach listExploitation [
+    [exploit] -> ask exploit [
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+    ]
+  ]
+  ]
+end
+
+to checkProfitEquivalent
+   foreach listExploitation [
+    [exploit] -> ask exploit [
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      [ ifelse symbolicvalue > 0 [ maintain] [abandon]
+    ]
+  ]
+  ]
+end
+
+to checkProfitIncreased
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -297,10 +402,10 @@ ticks
 30.0
 
 BUTTON
-74
-50
-137
-83
+73
+97
+136
+130
 NIL
 setup\n
 NIL
@@ -314,10 +419,10 @@ NIL
 1
 
 BUTTON
-75
-90
-138
-123
+76
+191
+139
+224
 NIL
 go
 NIL
@@ -331,10 +436,10 @@ NIL
 0
 
 BUTTON
-41
-143
-184
+33
+57
 176
+90
 NIL
 load-climatique
 NIL
@@ -363,6 +468,41 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+668
+19
+868
+169
+Owners Money in time
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"" 1.0 0 -11085214 true "" "ask owners [\n create-temporary-plot-pen (word who)\n set-plot-pen-color color\n plotxy ticks money\n ]"
+
+BUTTON
+75
+135
+138
+168
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
