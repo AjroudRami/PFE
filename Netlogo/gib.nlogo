@@ -6,6 +6,13 @@ globals[
 
   ;valeur qui délimite High Profit from Low Profit
   profit
+
+  ;Valeurs servant aux stats (Output)
+  createdEx maintained enlarged managed abandonned
+
+  avgSizeC avgSizeM avgSizeA
+
+  surfaceExploitAllu surfaceExploitFoot surfaceExploitPlat surfaceExploitSediment surfaceExploitHills
 ]
 
 
@@ -15,14 +22,18 @@ breed [landscapeunits landscapeunit]
 breed [towns town]
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
 patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster]
 ;; agrological power : % d'influence des conditions climatiques
-exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility notRentable]
+exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction sizeofland totalaccesibility notRentable age]
 
+;;ODD COMMENTAIRE
+;;Output 29 & 30 ????
+;;t1 : 22->24 ??!!! Aucun modele de cout difficile de faire ça
+;;Ajouter des doubles des variables pour avoir les stats sur les villas quand elles seront là
 
 to clear
   ca
@@ -41,24 +52,60 @@ to setup
   setupAgricultureStructure
   setupYearsOfExploitation
   randomEcoPowerOwners
-
+  init-stats
 
   reset-ticks
 end
 
 to go
-  if (ticks >= 300) [stop]
+  if (ticks >= 300) [
+    let maint exploitations with [age > 290]
+    let nmaint exploitations with [age < 291]
+    set avgSizeM (sum [length listofpatches] of maint)
+    set avgSizeC (sum [length listofpatches] of nmaint)
+    set maintained (count maint) stop]
   stuffBeforeOwnersCalcul
   ask patches [
     ifelse exploited [set yearsExploited (yearsExploited + 1)]
     [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
   ]
   calculHigherEqualLowerProfit
+  ask exploitations [ set age age + 1 ]
+
+  if(ticks mod 5 = 0)[changeClimat]
+
+  stats-surface
   tick
+end
+
+to stats-surface
+  let allu count patches with [landscapeType = 0]
+  let alluex count patches with [landscapeType = 0 and exploited = true]
+  set surfaceExploitAllu alluex / allu
+  let foot count patches with [landscapeType = 1]
+  let footex count patches with[landscapeType = 1 and exploited = true]
+  set surfaceExploitFoot footex / foot
+  let plat count patches with [landscapeType = 2]
+  let platex count patches with [landscapeType = 2 and exploited = true]
+  set surfaceExploitPlat platex / plat
+  let sedim count patches with [landscapeType = 3]
+  let sedimex count patches with [landscapeType = 3 and exploited = true]
+  set surfaceExploitSediment sedimex / sedim
+  let hill count patches with [landscapeType = 4]
+  let hillex count patches with [landscapeType = 4 and exploited = true]
+  set surfaceExploitHills hillex / hill
+
 end
 
 
 ;;; All needed T0 functions
+to init-stats
+  set createdEx 0
+  set maintained 0
+  set enlarged 0
+  set managed 0
+  set abandonned 0
+end
 
 to setupTown
   create-towns 1 [
@@ -72,6 +119,7 @@ to setupTown
     ]
   ]
 end
+
 
 to setupLandscapeType
   ask patches [
@@ -113,19 +161,17 @@ end
 to setupLandOwners
   create-owners (5)
   ask owners [
-    set rank item 2 ["farmers" "rich" "aristocrat"]
-    set radius 10
-    ;TODO A changer
-    set maxNumberExploit 6
+    set rank item random(3) ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
     set listExploitation []
   ]
 end
 
+;;TODO a changer d'autres init que la money
 to setupmoney
-  ifelse rank = "farmers" [ set money random(1000)]
-  [ifelse rank = "rich" [set money random(3000)]
-    [set money random(5000)]] ;;aristocrats
+  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 5]
+  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 15]
+    [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
 end
 
 to setupExploitationPerOwners
@@ -166,6 +212,7 @@ to create-exploitation [lOwner]
           ask patch x y [set pcolor black]
         ask owner lOwner [
             set listExploitation lput myself listExploitation
+            ifelse ([typeOfExploitation] of myself) = 0 [set farmbought farmbought + 1] [set villabought villabought + 1 ]
         ]
       ]
       ][]
@@ -268,6 +315,7 @@ end
 
 ;;Fonctions nécessaire au gros tableaux du ODD
 to maintain
+
 end
 
 to improve
@@ -295,17 +343,19 @@ to chooseRentableExploitationAndExpand
   ;;Necessary to enlarge terrain
   let watchTerrain 2
   let probablygood patches in-radius ([radius] of myself) with [exploited = false]
-  let terrain max-n-of watchTerrain probablygood [production]
-  let startcluster one-of terrain
-  ask startcluster [
-    set cluster self
-    set exploited true
-    set pcolor [color] of owner nameOwner
-    grow-cluster]
-  ;foreach terrain [set exploited true]
-   ask startcluster [
-        sprout-exploitations 1 [
-      set landowner nameOwner
+  if(count probablygood > watchTerrain) [
+    let terrain max-n-of watchTerrain probablygood [production]
+    let startcluster one-of terrain
+    ask startcluster [
+      set cluster self
+      set exploited true
+      set pcolor [color] of owner nameOwner
+      grow-cluster]
+    ;foreach terrain [set exploited true]
+    ask startcluster [
+      sprout-exploitations 1 [
+        set createdEx createdEx + 1
+        set landowner nameOwner
         set shape "house"
         set typeOfExploitation 0
         set listofpatches (list patch-here)
@@ -323,12 +373,13 @@ to chooseRentableExploitationAndExpand
         set goodprofit (totalproduction - totalaccesibility)
         ask patch-here [set pcolor black]
         ask owner nameOwner [
-            set listExploitation lput myself listExploitation
-            set numberOfExploitation numberOfExploitation + 1
+          set listExploitation lput myself listExploitation
+          set numberOfExploitation numberOfExploitation + 1
         ]
       ]
+    ]
+    if (goodprofit > profit) and (numb < maxn)  [chooseRentableExploitationAndExpand]
   ]
-  if (goodprofit > profit) and (numb < maxn)  [chooseRentableExploitationAndExpand]
 end
 
 ;;Si on abandonne une exploitation Alors on en crée une autre
@@ -341,7 +392,6 @@ to abandon
 
    chooseRentableExploitationAndExpand
 
-
   ask owner nameOwner [
     set listExploitation (remove myself listExploitation)
    ]
@@ -351,6 +401,8 @@ to abandon
     set exploited false
     set cluster nobody ]
 
+  set abandonned abandonned + 1
+  set avgSizeA avgSizeA + length listofpatches
   die ;; tue l'exploitation non rentable
 end
 
@@ -366,7 +418,7 @@ to enlarge
     set pcolor [color] of myself
     grow-cluster
     let blux  sort (patches with [cluster = startcluster])
-    if blux != 0 [ask myself[set listofpatches sentence listofpatches blux]]]
+    if blux != 0 [ask myself[set listofpatches sentence listofpatches blux] set enlarged enlarged + 1]]
   ]
 
 end
@@ -388,18 +440,52 @@ to cmd1 ;aristocrats money = profit (ODD)
 end
 
 to cmd2 ;rich
-
+ifelse money < oldmoney [checkProfitDecreased ]
+  [ ifelse money > oldmoney [checkProfitIncreased ]
+    [checkProfitEquivalent ]
+  ]
 end
 
 to cmd3 ; farmers
+ifelse money < oldmoney [checkProfitDecreasedFarmer ]
+  [ ifelse money > oldmoney [checkProfitIncreased ]
+    [checkProfitEquivalentFarmer ]
+  ]
+end
 
+to checkProfitDecreasedFarmer
+  foreach listExploitation [
+    [exploit] -> ask exploit [
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+    ]
+  ]
+  ]
+end
+
+to checkProfitEquivalentFarmer
+   foreach listExploitation [
+    [exploit] -> ask exploit [
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+    ]
+  ]
+  ]
+end
+
+to checkProfitIncreasedFarmer
+foreach listExploitation [
+    [exploit] -> ask exploit [
+      if (totalproduction - totalaccesibility) > profit [enlarge]
+    ]
+  ]
 end
 
 ;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
 to checkProfitDecreased
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain addStructure]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
@@ -430,7 +516,18 @@ to addStructure
   ask setpatch [
     set haveTools true
   ]
+  set managed managed + 1
 end
+
+to changeClimat
+  let clim random(5)
+  ask patches[
+    set climat clim
+    set agrologicalPower (item climat(item landscapeType climatique-data))
+  ]
+end
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -540,7 +637,7 @@ NIL
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
 "" 1.0 0 -11085214 true "" "ask owners [\n create-temporary-plot-pen (word who)\n set-plot-pen-color color\n plotxy ticks money\n ]"
@@ -561,6 +658,299 @@ NIL
 NIL
 NIL
 0
+
+MONITOR
+209
+501
+275
+546
+Fermes
+count exploitations with [typeOfExploitation = 0]
+17
+1
+11
+
+MONITOR
+197
+698
+267
+743
+Villa
+count exploitations with [typeOfExploitation = 1]
+17
+1
+11
+
+TEXTBOX
+211
+471
+361
+489
+Model Output
+13
+0.0
+1
+
+MONITOR
+290
+499
+376
+544
+Created Farm
+createdEx
+17
+1
+11
+
+MONITOR
+383
+498
+469
+543
+Maintained Farm
+maintained
+17
+1
+11
+
+MONITOR
+475
+498
+562
+543
+Enlarged Farm
+enlarged
+17
+1
+11
+
+MONITOR
+571
+498
+659
+543
+Abandonned farm
+abandonned
+17
+1
+11
+
+MONITOR
+565
+552
+679
+597
+Abandonned Farm
+avgSizeA / abandonned
+2
+1
+11
+
+MONITOR
+290
+551
+379
+596
+Created Farm
+avgSizeC / createdEx
+2
+1
+11
+
+MONITOR
+384
+551
+488
+596
+Maintained Farm
+avgSizeM / maintained
+2
+1
+11
+
+MONITOR
+291
+624
+357
+669
+Alluvian
+surfaceExploitAllu * 100
+2
+1
+11
+
+MONITOR
+368
+623
+440
+668
+Foot
+surfaceExploitFoot * 100
+2
+1
+11
+
+MONITOR
+596
+623
+659
+668
+Hills
+surfaceExploitHills * 100
+2
+1
+11
+
+MONITOR
+448
+623
+514
+668
+Plat
+surfaceExploitPlat * 100
+2
+1
+11
+
+MONITOR
+519
+623
+589
+668
+Sediment
+surfaceExploitSediment * 100
+2
+1
+11
+
+TEXTBOX
+188
+569
+285
+587
+Average Size ->
+13
+0.0
+1
+
+TEXTBOX
+132
+633
+282
+665
+% of surface exploited by landscape unit
+13
+0.0
+1
+
+MONITOR
+674
+289
+732
+334
+Farmers
+count owners with [rank = \"farmers\"]
+2
+1
+11
+
+MONITOR
+740
+288
+827
+333
+Big landowners
+count owners with [rank = \"rich\"]
+17
+1
+11
+
+MONITOR
+835
+288
+908
+333
+Aristocrats
+count owners with [rank = \"aristocrat\"]
+17
+1
+11
+
+TEXTBOX
+682
+245
+896
+277
+Number of each type of Landowners\n
+13
+0.0
+1
+
+MONITOR
+781
+343
+898
+388
+Aristo Moyenne Farms
+mean [farmbought] of owners with [rank = \"aristocrat\"]
+2
+1
+11
+
+MONITOR
+783
+392
+896
+437
+Aristo Min Farms
+min [farmbought] of owners with [rank = \"aristocrat\"]
+2
+1
+11
+
+MONITOR
+786
+446
+895
+491
+Aristo Max Farms
+max [farmbought] of owners with [rank = \"aristocrat\"]
+2
+1
+11
+
+MONITOR
+657
+445
+781
+490
+BigOwner Max Farm
+max [farmbought] of owners with [rank = \"rich\"]
+2
+1
+11
+
+MONITOR
+660
+394
+779
+439
+BigOwner Min Farm
+min [farmbought] of owners with [rank = \"rich\"]
+2
+1
+11
+
+MONITOR
+657
+341
+777
+386
+BigOwner Mean Farms
+mean [farmbought] of owners with [rank = \"rich\"]
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
