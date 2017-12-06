@@ -25,6 +25,7 @@ public class GetGoals implements Reporter {
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
+        //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
         FactSet facts = ((Agent) context.getAgent().getVariable(0)).goals();
         Iterator<Fact> iterator = facts.factIterator();
         LogoListBuilder builder = new LogoListBuilder();

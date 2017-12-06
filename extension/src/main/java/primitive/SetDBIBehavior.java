@@ -11,6 +11,7 @@ public class SetDBIBehavior implements Command {
     public void perform(Argument[] args, Context context) throws ExtensionException {
         Agent agent = (Agent) args[0].get();
         try {
+            //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
             context.getAgent().setVariable(0, agent);
         } catch (AgentException e) {
             e.printStackTrace();
