@@ -7,7 +7,19 @@ import org.nlogo.api.ExtensionException;
 import org.nlogo.api.Reporter;
 import org.nlogo.core.Syntax;
 
+/**
+ * This class implements a Netlogo primitive that is used to create a logical operator
+ */
 public class CreateOperator implements Reporter {
+
+    /**
+     * Depending on the number of arguments, the user can declare a standard operator (AND, OR, NOT, XOR),
+     * or create a new one. If declaring a new operator, the user must give the name and the arity of the operator.
+     * @param args
+     * @param context
+     * @return
+     * @throws ExtensionException
+     */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         String opName = args[0].getString();
