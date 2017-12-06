@@ -1,0 +1,52 @@
+;Contient les attributs et fonctions 
+;nécessaire aux outputs du modèle
+
+
+globals[
+;Valeurs servant aux stats (Output)
+  createdEx maintained enlarged managed abandonned
+
+  avgSizeC avgSizeM avgSizeA
+
+  surfaceExploitAllu surfaceExploitFoot surfaceExploitPlat surfaceExploitSediment surfaceExploitHills
+]
+
+;Initialise les variables servant aux statistiques
+;RAPPEL : Une variable non initialisée en Netlogo prend la valeur 0
+to init-stats
+  set createdEx 0
+  set maintained 0
+  set enlarged 0
+  set managed 0
+  set abandonned 0
+end
+
+;Calcul pour chaque "LandscapeType" la surface exploitée sur la surface globale
+to stats-surface
+  let allu count patches with [landscapeType = 0]
+  let alluex count patches with [landscapeType = 0 and exploited = true]
+  set surfaceExploitAllu alluex / allu
+  let foot count patches with [landscapeType = 1]
+  let footex count patches with[landscapeType = 1 and exploited = true]
+  set surfaceExploitFoot footex / foot
+  let plat count patches with [landscapeType = 2]
+  let platex count patches with [landscapeType = 2 and exploited = true]
+  set surfaceExploitPlat platex / plat
+  let sedim count patches with [landscapeType = 3]
+  let sedimex count patches with [landscapeType = 3 and exploited = true]
+  set surfaceExploitSediment sedimex / sedim
+  let hill count patches with [landscapeType = 4]
+  let hillex count patches with [landscapeType = 4 and exploited = true]
+  set surfaceExploitHills hillex / hill
+end
+
+;Calcul le nombre d'exploitation maintenues ainsi que le nombre d'exploitation agrandit
+;et leur taille respectives(en patches)
+;Cette fonction est appelée à la fin de la simulation
+to stats-maison
+  let maint exploitations with [age > 290]
+    let nmaint exploitations with [age < 291]
+    set avgSizeM (sum [length listofpatches] of maint)
+    set avgSizeC (sum [length listofpatches] of nmaint)
+    set maintained (count maint)
+end

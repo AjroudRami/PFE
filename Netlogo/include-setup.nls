@@ -1,0 +1,229 @@
+;Contient les attributs et fonctions 
+;nécessaire au setup du modèle
+
+;;; All needed T0 functions
+
+;Fonction qui définit la valeur du seuil High/Low profit
+to setup-profit
+  set profit 20
+end
+
+;Fonction qui sert à mettre en place les villes
+to setupTown
+  create-towns 1 [
+    set color black
+    setxy random-xcor random-ycor
+    set shape "flag"
+    let x (patch-set patch-here neighbors)
+    ask x[
+      set pcolor white
+      set exploited true
+    ]
+  ]
+end
+
+;Fontion qui met donne aux patchs leur types de paysages
+to setupLandscapeType
+  ask patches [
+    set haveTools false
+    set landscapeType random(5)
+    set cluster nobody
+  ]
+
+  ;;Optionnnel sert à faire des agrégat de région
+  repeat 50
+  [ ask patches
+    [ set landscapeType [landscapeType] of one-of neighbors4 ] ]
+end
+
+;Fonction qui associe un pouvoir agricole aux patches (piece of land)
+; en choississant au hasard un climat
+to setupClimatique
+;  let m1 matrix:from-row-list [
+;     Optimal - Hot&Humid - Hot&dRY - Cold&Humid - Cold&Dry
+;   [100 50 70 20 40] ;;alumnial
+;   [100 70 30 40 30] ;; Foothills
+;   [50 35 10 20 10] ;; Plateaux
+;   [75 22.5 45 15 30] ;; Seidmentary Basin
+;   [25 2.5 5 2.5 5] ;; Hillslopes
+;  ]
+
+  let clim random(5)
+
+  ask patches [
+    set climat clim
+    set exploited false
+    set agrologicalPower (item climat(item landscapeType climatique-data))
+    ]
+end
+
+;Crée les "owners" et associe un rang à chacun d'eux
+to setupLandOwners
+  create-owners (5)
+  ask owners [
+    set rank item random(3) ["farmers" "rich" "aristocrat"]
+    set numberOfExploitation 0
+    set listExploitation []
+  ]
+end
+
+;;Associe à chaque owners : son pouvoir éco, son nombre max d'éablissements, son rayon d'action (selon son rang)
+to setupmoney
+  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 5]
+  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 15]
+    [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
+end
+
+;Associe un nombre aléatoire d'exploitations à chaque owners et
+;les crée aléaoirement dans le monde
+to setupExploitationPerOwners
+  ask owners [
+  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
+  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
+  [set numberOfExploitation (random(4) + 1)]]
+
+  repeat numberOfExploitation [create-exploitation who]
+  ]
+
+ end
+
+;Associe une valeur symbolique à chaque exploitations
+to setupSymbolic
+  ask exploitations[
+    set symbolicvalue random(4)
+    ;;if near capital set symbolivalue symbolicvalue +1
+  ]
+end
+
+;Associe aléatoirement la présence de structures agricoles sur les patches (pieces of lands) des exploitations
+to setupAgricultureStructure
+  ask exploitations[
+    let x random(100)
+    if x < 50 [ foreach listofpatches [set yearsExploited true]
+    ]
+  ]
+end
+
+;Associe un nombre d'années aléatoire d'exploitation aux patches (pieces of lands) des exploitations  
+to setupYearsOfExploitation
+  ask exploitations[
+    let x random(10)
+    foreach listofpatches [set yearsExploited x]
+  ]
+end
+
+;Initialise le fait que les owners ai fait du profit ou non l'an passé
+to randomEcoPowerOwners
+ask owners[
+   set oldmoney money
+   let p random(3)
+    ifelse p = 0 [ set money (money - 50) ]
+    [if p = 1 [set money (money + 50)] ]
+      ;; 2 does nothing
+  ]
+end
+
+;Crée une exploitation pour l'owner "lOwner"
+;Appelée seulement lors du setup
+to create-exploitation [lOwner]
+
+  ;A améliorer pour prendre + de terrains autour de chaque exploitation
+
+  let created false
+  while [ not created ]
+  [
+    let x random-xcor
+    let y random-ycor
+      ask patch-at x y [
+      ifelse exploited = false [
+        set exploited true
+        set created true
+        sprout-exploitations 1 [
+        set landowner lOwner
+        set shape "house"
+        set typeOfExploitation 0
+        set listofpatches (list patch-here)
+        set symbolicvalue random(4)
+        set color [color] of owner landowner
+        set totalproduction 0
+        set sizeofland 1
+        set notRentable 0
+        set totalaccesibility 0
+          ask patch x y [set pcolor black]
+        ask owner lOwner [
+            set listExploitation lput myself listExploitation
+            ifelse ([typeOfExploitation] of myself) = 0 [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+        ]
+      ]
+      ][]
+  ]
+  ]
+end
+
+
+;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;Visuel;;;;;;
+;;;;;;;;;;;;;;;;;;;;
+
+
+;Fonction qui associe une couleur aux patches selon leur "LandscapeType"
+to setupcolorlandscape
+  ask patches[
+    set pcolor (15 + (landscapeType * 20))
+  ]
+end
+
+;Mise à zéro d'un owner
+to zero-owner
+  set rank "" ;String
+  set ecopower 0 ; int
+  set money 0 ; int
+  set oldmoney 0 ;int
+  set radius 0 ; int
+  set maxNumberExploit 0 ; int
+  set numberOfExploitation 0 ; int
+  set listExploitation [] ;Netlogo list
+  set landproductivity 0 ;int
+  set landmanagement 0; int ?
+  set macrocontext 0; int ? 
+  set farmbought 0; int
+  set villabought 0 ; int
+end
+
+;Mise à zéro d'une exploitation
+to zero-exploitation
+  set landowner 0 ; Int id of owner
+  set typeOfExploitation "" ; String farm or villa
+  set listofpatches [] ; Netlogo List containing patches
+  set symbolicvalue 0 ; int
+  set totalproduction 0 ; int
+  set sizeofland 0 ; int length of listofpatches
+  set totalaccesibility 0 ; int
+  set notRentable 0 ; int Years of being not rentable
+  set age 0 ; int
+end
+
+;Mise à zéro d'une landscape unit (UNUSED)
+to zero-landscapeUnit
+  set name "" ; String
+  set location 0 ; ??
+  set agrologicalpower2 0; int
+end
+
+;Mise à zéro d'une piece of land
+to zero-piece-of-land
+  set landscapeType 0 ; Int 
+  set haveTools false ; Boolean
+  set agrologicalPower 0 ; Int
+  set exploited false ; Boolean
+  set yearsExploited 0 ; int
+  set production 0 ; int
+  set accessibility 0 ; int
+  set climat 0 ; int
+  set cluster 0 ; int Id of a patch
+end
+
+;Mise à zéro d'une town (UNUSED)
+to zero-town
+  
+end

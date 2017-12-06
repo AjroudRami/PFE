@@ -1,25 +1,20 @@
+;Ajout d'extension java
 extensions[matrix]
+;Ajout de fichiers "foo.nls" contenant du code NetLogo
+__includes["include-output.nls" "include-setup.nls" "include-utils.nls"]
 
+;Définition des variables globales du modèle
 globals[
-  ;Conteneur des donnees issus des fichiers
-  climatique-data
 
-  ;valeur qui délimite High Profit from Low Profit
-  profit
-
-  ;Valeurs servant aux stats (Output)
-  createdEx maintained enlarged managed abandonned
-
-  avgSizeC avgSizeM avgSizeA
-
-  surfaceExploitAllu surfaceExploitFoot surfaceExploitPlat surfaceExploitSediment surfaceExploitHills
 ]
 
-
+;Définition des espèces d'agents
 breed [owners owner]
 breed [exploitations exploitation]
 breed [landscapeunits landscapeunit]
 breed [towns town]
+
+;Définition des attributs des différents agents
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
 owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
@@ -35,13 +30,20 @@ exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue total
 ;;t1 : 22->24 ??!!! Aucun modele de cout difficile de faire ça
 ;;Ajouter des doubles des variables pour avoir les stats sur les villas quand elles seront là
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;FONCTIONS PRINCIPALES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;Remise à zéro de la simulation
 to clear
   ca
+  reset-ticks
 end
 
+;Fonction qui appelle les setups de l'environnement et des différentes entités
 to setup
-  ;;create-turtles 100 [setxy random-xcor random-ycor]
-  set profit 20
+  setup-profit
   setupLandscapeType
   setupcolorlandscape
   setupClimatique
@@ -52,242 +54,39 @@ to setup
   setupAgricultureStructure
   setupYearsOfExploitation
   randomEcoPowerOwners
-  init-stats
-
-  reset-ticks
+  init-stats ;include-outpus.nls
 end
 
+;Fonction qui fait avancer le monde
 to go
   if (ticks >= 300) [
-    let maint exploitations with [age > 290]
-    let nmaint exploitations with [age < 291]
-    set avgSizeM (sum [length listofpatches] of maint)
-    set avgSizeC (sum [length listofpatches] of nmaint)
-    set maintained (count maint) stop]
-  stuffBeforeOwnersCalcul
-  ask patches [
-    ifelse exploited [set yearsExploited (yearsExploited + 1)]
-    [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
-  ]
-  calculHigherEqualLowerProfit
-  ask exploitations [ set age age + 1 ]
+    stats-maison ;include-output.nls
+    stop]
 
-  if(ticks mod 5 = 0)[changeClimat]
+  stuffBeforeOwnersCalcul
+  calculHigherEqualLowerProfit
+
+  increment-years-exploited ;include-uils
+  increment-age-exploitations ;include-uils
+  changeClimat ; include-uils
 
   stats-surface
   tick
 end
 
-to stats-surface
-  let allu count patches with [landscapeType = 0]
-  let alluex count patches with [landscapeType = 0 and exploited = true]
-  set surfaceExploitAllu alluex / allu
-  let foot count patches with [landscapeType = 1]
-  let footex count patches with[landscapeType = 1 and exploited = true]
-  set surfaceExploitFoot footex / foot
-  let plat count patches with [landscapeType = 2]
-  let platex count patches with [landscapeType = 2 and exploited = true]
-  set surfaceExploitPlat platex / plat
-  let sedim count patches with [landscapeType = 3]
-  let sedimex count patches with [landscapeType = 3 and exploited = true]
-  set surfaceExploitSediment sedimex / sedim
-  let hill count patches with [landscapeType = 4]
-  let hillex count patches with [landscapeType = 4 and exploited = true]
-  set surfaceExploitHills hillex / hill
 
-end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Starting T1 functions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;;; All needed T0 functions
-to init-stats
-  set createdEx 0
-  set maintained 0
-  set enlarged 0
-  set managed 0
-  set abandonned 0
-end
-
-to setupTown
-  create-towns 1 [
-    set color black
-    setxy random-xcor random-ycor
-    set shape "flag"
-    let x (patch-set patch-here neighbors)
-    ask x[
-      set pcolor white
-      set exploited true
-    ]
-  ]
-end
-
-
-to setupLandscapeType
-  ask patches [
-    set haveTools false
-    set landscapeType random(5)
-    set cluster nobody
-  ]
-
-  repeat 50
-  [ ask patches
-    [ set landscapeType [landscapeType] of one-of neighbors4 ] ]
-end
-
-to setupClimatique
-;  let m1 matrix:from-row-list [
-;     Optimal - Hot&Humid - Hot&dRY - Cold&Humid - Cold&Dry
-;   [100 50 70 20 40] ;;alumnial
-;   [100 70 30 40 30] ;; Foothills
-;   [50 35 10 20 10] ;; Plateaux
-;   [75 22.5 45 15 30] ;; Seidmentary Basin
-;   [25 2.5 5 2.5 5] ;; Hillslopes
-;  ]
-
-  let clim random(5)
-
-  ask patches [
-    set climat clim
-    set exploited false
-    set agrologicalPower (item climat(item landscapeType climatique-data))
-    ]
-end
-
-to setupcolorlandscape
-  ask patches[
-    set pcolor (15 + (landscapeType * 20))
-  ]
-end
-
-to setupLandOwners
-  create-owners (5)
-  ask owners [
-    set rank item random(3) ["farmers" "rich" "aristocrat"]
-    set numberOfExploitation 0
-    set listExploitation []
-  ]
-end
-
-;;TODO a changer d'autres init que la money
-to setupmoney
-  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 5]
-  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 15]
-    [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
-end
-
-to setupExploitationPerOwners
-  ask owners [
-  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
-  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
-  [set numberOfExploitation (random(4) + 1)]]
-
-  repeat numberOfExploitation [create-exploitation who]
-  ]
-
- end
-
-to create-exploitation [lOwner]
-
-  ;A améliorer pour prendre + de terrains autour de chaque exploitation
-
-  let created false
-  while [ not created ]
-  [
-    let x random-xcor
-    let y random-ycor
-      ask patch-at x y [
-      ifelse exploited = false [
-        set exploited true
-        set created true
-        sprout-exploitations 1 [
-        set landowner lOwner
-        set shape "house"
-        set typeOfExploitation 0
-        set listofpatches (list patch-here)
-        set symbolicvalue random(4)
-        set color [color] of owner landowner
-        set totalproduction 0
-        set sizeofland 1
-        set notRentable 0
-        set totalaccesibility 0
-          ask patch x y [set pcolor black]
-        ask owner lOwner [
-            set listExploitation lput myself listExploitation
-            ifelse ([typeOfExploitation] of myself) = 0 [set farmbought farmbought + 1] [set villabought villabought + 1 ]
-        ]
-      ]
-      ][]
-  ]
-  ]
-end
-
-to setupSymbolic
-  ask exploitations[
-    set symbolicvalue random(4)
-    ;;if near capital set symbolivalue symbolicvalue +1
-  ]
-end
-
-to setupAgricultureStructure
-  ask exploitations[
-    let x random(100)
-    if x < 50 [ foreach listofpatches [set yearsExploited true]
-    ]
-  ]
-end
-
-to setupYearsOfExploitation
-  ask exploitations[
-    let x random(10)
-    foreach listofpatches [set yearsExploited x]
-  ]
-end
-
-
-;;Utils
-to impactYearsExploitation
-  let impact (list 0 -10 -20 -10 -20)
-  set production production + (round(yearsExploited / 5) * (item landscapetype impact))
-end
-
-to impactAgriculturalStructure
-  if haveTools [set production production + 20]
-end
-
-to load-climatique
-
-  ;let file user-file
-let file "climatique.txt"
-  if(file != false)
-  [
-    set climatique-data []
-    file-open file
-    while [ not file-at-end? ]
-    [set climatique-data sentence climatique-data (list (list file-read file-read file-read file-read file-read))]
-   ]
-     ;user-message "Climatique load complete..."
-     file-close
-end
-
-
-;; Starting T1 functions
-
-to randomEcoPowerOwners
-ask owners[
-   set oldmoney money
-   let p random(3)
-    ifelse p = 0 [ set money (money - 50) ]
-    [if p = 1 [set money (money + 50)] ]
-      ;; 2 does nothing
-  ]
-end
 
 to stuffBeforeOwnersCalcul
 
-
   ask patches[
     set production agrologicalPower
-    impactAgriculturalStructure
-    impactYearsExploitation
+    impactAgriculturalStructure ; include-uils
+    impactYearsExploitation ; include-uils
     ;; T1 : 15
     if exploited [set accessibility distance one-of towns]
   ]
@@ -305,94 +104,32 @@ to stuffBeforeOwnersCalcul
     set money (sum [(2 * totalproduction) - totalaccesibility] of turtle-set listExploitation)
   ]
 
-  ;;T1 : 19
-  let freepol patches with [exploited = false]
-
-
+  let _freepol patches with [exploited = false]
 
 end
 
 
 ;;Fonctions nécessaire au gros tableaux du ODD
+
+;Appelle les fonctions de maintien d'une exploitation
 to maintain
 
 end
 
+;Appelle les fonctions d'améliorations de l'exploitation
 to improve
-
-end
-
-;;Fonction qui fait en sorte que les patchs soient contigus
-to grow-cluster
-
-  ask neighbors4 with [(cluster = nobody) and (exploited = false)]
-  [ set cluster [cluster] of myself
-    set exploited true
-    set pcolor [pcolor] of myself ;[color] of [landowner] of myself
-  ]
-end
-
-;;Si le profit de la nouvelle exploitation est Haut alors en crée jusqu'au max
-to chooseRentableExploitationAndExpand
-
-  ;Necessary to loop
-  let nameOwner [landowner] of self
-  let goodprofit 0
-  let numb [numberOfExploitation] of myself
-  let maxn [maxNumberExploit] of myself
-  ;;Necessary to enlarge terrain
-  let watchTerrain 2
-  let probablygood patches in-radius ([radius] of myself) with [exploited = false]
-  if(count probablygood > watchTerrain) [
-    let terrain max-n-of watchTerrain probablygood [production]
-    let startcluster one-of terrain
-    ask startcluster [
-      set cluster self
-      set exploited true
-      set pcolor [color] of owner nameOwner
-      grow-cluster]
-    ;foreach terrain [set exploited true]
-    ask startcluster [
-      sprout-exploitations 1 [
-        set createdEx createdEx + 1
-        set landowner nameOwner
-        set shape "house"
-        set typeOfExploitation 0
-        set listofpatches (list patch-here)
-        set symbolicvalue random(4)
-        set totalproduction 0
-        set sizeofland 1
-        set notRentable 0
-        set color [color] of owner landowner
-        set totalaccesibility 0
-        let blux  sort (patches with [cluster = startcluster])
-        if blux != 0 [set listofpatches sentence listofpatches blux]
-
-        set totalproduction (sum [production] of  (patch-set listofpatches))
-        set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
-        set goodprofit (totalproduction - totalaccesibility)
-        ask patch-here [set pcolor black]
-        ask owner nameOwner [
-          set listExploitation lput myself listExploitation
-          set numberOfExploitation numberOfExploitation + 1
-        ]
-      ]
-    ]
-    if (goodprofit > profit) and (numb < maxn)  [chooseRentableExploitationAndExpand]
-  ]
+  addStructure ; include-utils
 end
 
 ;;Si on abandonne une exploitation Alors on en crée une autre
 ;;dans le rayon d'action par rapport à son ancienne exploitation
 ;;puis on tue l'exploitation courante (non rentable)
 to abandon
-  let nameOwner [landowner] of self
-  let maxn [maxNumberExploit] of myself
-  let numb [numberOfExploitation] of myself
+  let _nameOwner [landowner] of self
 
    chooseRentableExploitationAndExpand
 
-  ask owner nameOwner [
+  ask owner _nameOwner [
     set listExploitation (remove myself listExploitation)
    ]
 
@@ -406,32 +143,97 @@ to abandon
   die ;; tue l'exploitation non rentable
 end
 
+;Agrandit un terrain (en croix)
 to enlarge
-  let watchTerrain 2
-  let probablygood  (patch-set [neighbors4] of (patch-set listofpatches) ) with [exploited = false]
+  let watchTerrain 2 ;;Nombre de terrains max que l'exloitation va évaluer comme étant rentable ou non
+  let probablygood  (patch-set [neighbors4] of (patch-set listofpatches) ) with [exploited = false] ;Terrains proches et non exploité
   if (count probablygood >= watchTerrain) [
     let terrain max-n-of watchTerrain probablygood [production]
-  let startcluster one-of terrain
-  ask startcluster [
-    set cluster self
-    set exploited true
-    set pcolor [color] of myself
-    grow-cluster
-    let blux  sort (patches with [cluster = startcluster])
-    if blux != 0 [ask myself[set listofpatches sentence listofpatches blux] set enlarged enlarged + 1]]
+    let startcluster one-of terrain
+    ask startcluster [
+      set cluster self
+      set exploited true
+      set pcolor [color] of myself
+      grow-cluster
+      let groupPatches sort (patches with [cluster = startcluster])
+      if groupPatches != 0 [ask myself[set listofpatches sentence listofpatches groupPatches] set enlarged enlarged + 1]]
   ]
 
 end
 
+;;Fonction qui fait en sorte que les patchs soient contigus
+;;Propage aux voisins directs une "seed" permettant de grouper les patchs
+;par rapport à la "seed"
+to grow-cluster
+
+  ask neighbors4 with [(cluster = nobody) and (exploited = false)]
+  [ set cluster [cluster] of myself
+    set exploited true
+    set pcolor [pcolor] of myself ;[color] of [landowner] of myself
+  ]
+end
+
+;;Si le profit de la nouvelle exploitation est Haut alors en crée jusqu'au max
+to chooseRentableExploitationAndExpand
+
+  ;Necessary to loop
+  let _nameOwner [landowner] of self
+  let _goodprofit 0
+  let _numb [numberOfExploitation] of myself
+  let _maxn [maxNumberExploit] of myself
+  ;;Necessary to enlarge terrain
+  let _watchTerrain 2
+  let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
+  if(count _probablygood > _watchTerrain) [
+    let _terrain max-n-of _watchTerrain _probablygood [production]
+    let _startcluster one-of _terrain
+    ask _startcluster [
+      set cluster self
+      set exploited true
+      set pcolor [color] of owner _nameOwner
+      grow-cluster]
+    ;foreach terrain [set exploited true]
+    ask _startcluster [
+      sprout-exploitations 1 [
+        set createdEx createdEx + 1
+        set landowner _nameOwner
+        set shape "house"
+        set typeOfExploitation 0
+        set listofpatches (list patch-here)
+        set symbolicvalue random(4)
+        set totalproduction 0
+        set sizeofland 1
+        set notRentable 0
+        set color [color] of owner landowner
+        set totalaccesibility 0
+        let _patchset  sort (patches with [cluster = _startcluster])
+        if _patchset != 0 [set listofpatches sentence listofpatches _patchset]
+
+        set totalproduction (sum [production] of  (patch-set listofpatches))
+        set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
+        set _goodprofit (totalproduction - totalaccesibility)
+        ask patch-here [set pcolor black]
+        ask owner _nameOwner [
+          set listExploitation lput myself listExploitation
+          set numberOfExploitation numberOfExploitation + 1
+        ]
+      ]
+    ]
+    if (_goodprofit > profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
+  ]
+end
+
+
+;Appelle les fonctions responsables des choix en fonctions des profits réalisés
 to calculHigherEqualLowerProfit
   ask owners [
-
     ifelse rank = "aristocrat" [ cmd1 ]
     [ifelse rank = "rich" [cmd2]
     [cmd3]] ;;farmers
   ]
 end
 
+;Appelle la fonction correspondant à l'état du profit des aristocrats
 to cmd1 ;aristocrats money = profit (ODD)
   ifelse money < oldmoney [checkProfitDecreased ]
   [ ifelse money > oldmoney [checkProfitIncreased ]
@@ -439,6 +241,7 @@ to cmd1 ;aristocrats money = profit (ODD)
   ]
 end
 
+;Appelle la fonction correspondant à l'état du profit des Big Landowner
 to cmd2 ;rich
 ifelse money < oldmoney [checkProfitDecreased ]
   [ ifelse money > oldmoney [checkProfitIncreased ]
@@ -446,6 +249,7 @@ ifelse money < oldmoney [checkProfitDecreased ]
   ]
 end
 
+;Appelle la fonction correspondant à l'état du profit des fermiers
 to cmd3 ; farmers
 ifelse money < oldmoney [checkProfitDecreasedFarmer ]
   [ ifelse money > oldmoney [checkProfitIncreased ]
@@ -453,7 +257,9 @@ ifelse money < oldmoney [checkProfitDecreasedFarmer ]
   ]
 end
 
-to checkProfitDecreasedFarmer
+
+;Choix concernant les exploitations des fermiers
+to checkProfitDecreasedFarmer ;Baisse de profit
   foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse (totalproduction - totalaccesibility) > profit [ maintain]
@@ -463,7 +269,7 @@ to checkProfitDecreasedFarmer
   ]
 end
 
-to checkProfitEquivalentFarmer
+to checkProfitEquivalentFarmer ; Profit Equivalent
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse (totalproduction - totalaccesibility) > profit [ maintain]
@@ -473,7 +279,7 @@ to checkProfitEquivalentFarmer
   ]
 end
 
-to checkProfitIncreasedFarmer
+to checkProfitIncreasedFarmer ;Augmentation Profit
 foreach listExploitation [
     [exploit] -> ask exploit [
       if (totalproduction - totalaccesibility) > profit [enlarge]
@@ -481,18 +287,19 @@ foreach listExploitation [
   ]
 end
 
+;Choix concernant les exploitations des aristocrates et des Big landowners
 ;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
-to checkProfitDecreased
+to checkProfitDecreased ; Baisse de profit
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain addStructure]
+      ifelse (totalproduction - totalaccesibility) > profit [maintain]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
   ]
 end
 
-to checkProfitEquivalent
+to checkProfitEquivalent ; Profit Equivalent
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse (totalproduction - totalaccesibility) > profit [ maintain]
@@ -502,30 +309,15 @@ to checkProfitEquivalent
   ]
 end
 
-to checkProfitIncreased
+to checkProfitIncreased ;Augmentation du profit
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) < profit [ maintain addStructure]
+      ifelse (totalproduction - totalaccesibility) < profit [ maintain improve]
       [ enlarge]
     ]
   ]
 end
 
-to addStructure
-  let setpatch (patch-set listofpatches)
-  ask setpatch [
-    set haveTools true
-  ]
-  set managed managed + 1
-end
-
-to changeClimat
-  let clim random(5)
-  ask patches[
-    set climat clim
-    set agrologicalPower (item climat(item landscapeType climatique-data))
-  ]
-end
 
 
 @#$#@#$#@

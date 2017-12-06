@@ -1,0 +1,70 @@
+;Contient des fonctions utilitaires aux modèles
+;et les attributs qui leurs sont nécessaires
+
+;Définition des variables globales necessaires aux fonctions "Utilitaires"
+globals[
+   ;Conteneur des donnees issus des fichiers
+  climatique-data
+
+  ;valeur qui délimite High Profit from Low Profit
+  profit
+]
+
+;;Utils
+to impactYearsExploitation
+  let impact (list 0 -10 -20 -10 -20)
+  set production production + (round(yearsExploited / 5) * (item landscapetype impact))
+end
+
+to impactAgriculturalStructure
+  if haveTools [set production production + 20]
+end
+
+to addStructure
+  let setpatch (patch-set listofpatches)
+  ask setpatch [
+    set haveTools true
+  ]
+  set managed managed + 1
+end
+
+;Fonction qui change le climat tout les 5 ticks
+to changeClimat
+  if(ticks mod 5 = 0)[
+    let clim random(5)
+    ask patches[
+      set climat clim
+      set agrologicalPower (item climat(item landscapeType climatique-data))
+    ]
+  ]
+end
+
+;Fonction qui incrémente/décrémente le nombre d'années
+;d'exploitation des patches (piece of land)
+to increment-years-exploited
+  ask patches [
+    ifelse exploited [set yearsExploited (yearsExploited + 1)]
+    [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
+  ]
+end
+
+;Fonction qui incrémente l'age des exploitations
+to increment-age-exploitations
+  ask exploitations [ set age age + 1 ]
+end
+
+;Charge le fichier contenant le tableau des pouvoirs agricoles
+to load-climatique
+  ;let file user-file
+let file "climatique.txt"
+  if(file != false)
+  [
+    set climatique-data []
+    file-open file
+    while [ not file-at-end? ]
+    [set climatique-data sentence climatique-data (list (list file-read file-read file-read file-read file-read))]
+   ]
+     ;user-message "Climatique load complete..."
+     file-close
+end
+
