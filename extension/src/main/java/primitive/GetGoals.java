@@ -1,12 +1,14 @@
 package primitive;
 
 import kobdig.agent.Agent;
-import org.nlogo.api.Argument;
-import org.nlogo.api.Context;
-import org.nlogo.api.ExtensionException;
-import org.nlogo.api.Reporter;
+import kobdig.agent.Fact;
+import kobdig.agent.FactSet;
+import org.nlogo.api.*;
+import org.nlogo.core.LogoList;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
+
+import java.util.Iterator;
 
 /**
  * This class implements a primitive used to retreive the DBI Agent Goals
@@ -14,25 +16,32 @@ import org.nlogo.core.SyntaxJ;
 public class GetGoals implements Reporter {
 
     /**
-     * This primitive returns a FactSet bundled in an Object
+     * This primitive returns a FactSet bundled in a LogoList object
      *
      * @param args
      * @param context
-     * @return a FactSet bundled in an object
+     * @return a FactSet bundled in a LogoList object
      * @throws ExtensionException
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        return ((Agent) context.getAgent().getVariable(0)).goals();
+        //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
+        FactSet facts = ((Agent) context.getAgent().getVariable(0)).goals();
+        Iterator<Fact> iterator = facts.factIterator();
+        LogoListBuilder builder = new LogoListBuilder();
+        while (iterator.hasNext()) {
+            builder.add(iterator.next());
+        }
+        return builder.toLogoList();
     }
 
     /**
      * It takes no arguments
-     *
-     * @return
+     *And returns a LogoList of Fact
+     * @return LogoList<Fact> type
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(Syntax.ListType());
     }
 }

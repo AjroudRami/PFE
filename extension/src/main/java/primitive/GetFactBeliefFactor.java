@@ -8,6 +8,7 @@ import org.nlogo.core.SyntaxJ;
 public class GetFactBeliefFactor implements Reporter {
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
+        //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
         Fact fact = (Fact) args[0].get();
         Agent agent = context.getAgent();
         kobdig.agent.Agent dbi = (kobdig.agent.Agent) agent.getVariable(0);

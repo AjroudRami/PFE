@@ -7,6 +7,7 @@ import org.nlogo.core.SyntaxJ;
 public class DeleteBehavior implements Command {
     @Override
     public void perform(Argument[] args, Context context) throws ExtensionException {
+        //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
         Agent agent = args[0].getAgent();
         try {
             agent.setVariable(0, null);
