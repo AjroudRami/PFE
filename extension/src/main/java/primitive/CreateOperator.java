@@ -40,8 +40,15 @@ public class CreateOperator implements Reporter {
         return null;
     }
 
+    /**
+     * Create a standard operator from its String name
+     * @param name
+     * @return
+     */
     private Operator parseOperator(String name) {
-        switch (name) {
+        //Avoid case problems
+        String nameToUpper = name.toUpperCase();
+        switch (nameToUpper) {
             case "AND":
                 return Operator.AND;
             case "OR":
