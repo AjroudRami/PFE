@@ -29,4 +29,6 @@ public class Primitives {
     public static final String SET_DBI_BEHAVIOR = "set-dbi-behavior";
     public static final String CREATE_EMPTY_DBI = "create-empty-dbi";
 
+
+    public static final String REMOVE_DUPLICATES = "remove-duplicates";
 }
