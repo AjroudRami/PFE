@@ -14,6 +14,7 @@ public class CreateFormula implements Reporter {
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         Operator o = (Operator) args[0].get();
+        //TODO check if this work or use LogoList instead
         Formula[] formulas = (Formula[]) args[1].get();
         Formula formula = new Formula(o, formulas);
         return formula;

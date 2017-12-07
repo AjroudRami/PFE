@@ -10,7 +10,7 @@ public class DeleteBehavior implements Command {
         //TODO flaw in conception, dbi behavior is assumed to be index 0 in Agent variables
         Agent agent = args[0].getAgent();
         try {
-            agent.setVariable(0, null);
+            agent.setVariable(Primitives.dbi_index, null);
         } catch (AgentException e) {
             e.printStackTrace();
             throw new ExtensionException("Error while removing behavior to the agent caused by:\n"
