@@ -13,7 +13,7 @@ public class ExtensionClassManager extends DefaultClassManager{
         primManager.addPrimitive(Primitives.CREATE_ATOM, new CreateAtom());
         primManager.addPrimitive(Primitives.UPDATE_AGENT_BELIEF, new UpdateBelief());
         primManager.addPrimitive(Primitives.GET_AGENT_GOALS, new GetGoals());
-        primManager.addPrimitive(Primitives.GET_AGENT_BELIEF_FACTOR, new GetAgentBeliefFactor());
+        primManager.addPrimitive(Primitives.GET_AGENT_BELIEF_FACTOR, new GetFactDesireFactor());
         primManager.addPrimitive(Primitives.GET_FACT_BELIEF_FACTOR, new GetFactBeliefFactor());
         primManager.addPrimitive(Primitives.CREATE_PROPOSITION, new CreatePropositionFormula());
         primManager.addPrimitive(Primitives.CREATE_FACT_FROM_FORMULA, new CreateFactFromFormula());
