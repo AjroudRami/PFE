@@ -158,7 +158,21 @@ to enlarge
       let groupPatches sort (patches with [cluster = startcluster])
       if groupPatches != 0 [ask myself[set listofpatches sentence listofpatches groupPatches] set enlarged enlarged + 1]]
   ]
+end
 
+to enlarge2 [listpatches]
+  let watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
+  if ( count watchterrain) > 0 [
+    let p  max-n-of 1 watchterrain [production]
+    ask self[
+      set listofpatches sentence listpatches (sort p)
+    ]
+
+    ask p [
+      set exploited true
+      set pcolor [color] of myself
+    ]
+  ]
 end
 
 ;;Fonction qui fait en sorte que les patchs soient contigus
@@ -282,7 +296,7 @@ end
 to checkProfitIncreasedFarmer ;Augmentation Profit
 foreach listExploitation [
     [exploit] -> ask exploit [
-      if (totalproduction - totalaccesibility) > profit [enlarge]
+      if (totalproduction - totalaccesibility) > profit [enlarge2 listofpatches]
     ]
   ]
 end
@@ -313,12 +327,10 @@ to checkProfitIncreased ;Augmentation du profit
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse (totalproduction - totalaccesibility) < profit [ maintain improve]
-      [ enlarge]
+      [ enlarge2 listofpatches]
     ]
   ]
 end
-
-
 
 @#$#@#$#@
 GRAPHICS-WINDOW
