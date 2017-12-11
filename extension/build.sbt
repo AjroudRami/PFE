@@ -2,7 +2,7 @@ enablePlugins(org.nlogo.build.NetLogoExtension)
 
 netLogoExtName      := "dbi_agents"
 
-netLogoClassManager := "ExtensionClassManager"
+netLogoClassManager := "primitive.ExtensionClassManager"
 
 scalaVersion           := "2.11.7"
 
