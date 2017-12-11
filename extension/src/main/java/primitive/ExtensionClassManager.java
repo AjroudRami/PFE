@@ -24,8 +24,10 @@ public class ExtensionClassManager extends DefaultClassManager{
         primManager.addPrimitive(Primitives.CREATE_PROPOSITIONAL_ATOM, new CreatePropositionalAtom());
         primManager.addPrimitive(Primitives.SET_DBI_BEHAVIOR, new SetDBIBehavior());
         primManager.addPrimitive(Primitives.CREATE_EMPTY_DBI, new CreateEmptyDBI());
+        primManager.addPrimitive(Primitives.INIT_DBI_STORAGE, new InitDBIStorage());
 
-        primManager.addPrimitive(Primitives.REMOVE_DUPLICATES, new RemoveDuplicates());
+        primManager.addPrimitive(Primitives.REMOVE_DUPLICATES, new RemoveDuplicates()
+        );
 
     }
 }
