@@ -1,6 +1,6 @@
-package primitive;
+package primitive.logic;
 
-import kobdig.logic.Atom;
+import kobdig.agent.Fact;
 import kobdig.logic.Formula;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
@@ -9,12 +9,13 @@ import org.nlogo.api.Reporter;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
-public class CreateFormulaFromAtom implements Reporter {
+public class CreateFactFromFormula implements Reporter {
+
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        Atom atom = (Atom) args[0].get();
-        Formula formula = new Formula(atom);
-        return formula;
+        Formula formula = (Formula) args[0].get();
+        Fact fact = new Fact(formula);
+        return fact;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent.storage;
 
 import kobdig.agent.Agent;
 import org.nlogo.api.Argument;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class InitDBIStorage implements Command{
+public class DBIStorage implements Command{
 
     private Map<String, Agent> agents;
 
@@ -58,5 +58,13 @@ public class InitDBIStorage implements Command{
             opt = Optional.empty();
         }
         return opt;
+    }
+
+    /**
+     * Remove an agent from the storage
+     * @param name
+     */
+    public void remove(String name) {
+        this.agents.remove(name);
     }
 }

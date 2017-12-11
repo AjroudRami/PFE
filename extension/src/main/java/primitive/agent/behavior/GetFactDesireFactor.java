@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent.behavior;
 
 import kobdig.agent.Agent;
 import kobdig.agent.Fact;
@@ -14,14 +14,14 @@ public class GetFactDesireFactor implements Reporter {
 
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        Fact fact = (Fact) args[0].get();
-        Agent agent = (Agent) context.getAgent().getVariable(Primitives.dbi_index);
-        double factor = agent.desires(fact).doubleValue();
+        Agent dbi = (Agent) args[0].get();
+        Fact fact = (Fact) args[1].get();
+        double factor = dbi.desires(fact).doubleValue();
         return factor;
     }
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.NumberType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType(), Syntax.ReferenceType()}, Syntax.NumberType());
     }
 }

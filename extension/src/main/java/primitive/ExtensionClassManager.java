@@ -3,11 +3,30 @@ package primitive;
 import org.nlogo.api.DefaultClassManager;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.api.PrimitiveManager;
+import primitive.agent.behavior.GetFactBeliefFactor;
+import primitive.agent.behavior.GetFactDesireFactor;
+import primitive.agent.behavior.GetGoals;
+import primitive.agent.behavior.UpdateBelief;
+import primitive.agent.io.ExportDBIBehavior;
+import primitive.agent.io.ImportDBIBehavior;
+import primitive.agent.storage.AddDBIBehavior;
+import primitive.agent.CreateEmptyDBI;
+import primitive.agent.storage.DBIStorage;
+import primitive.agent.storage.DeleteBehavior;
+import primitive.logic.*;
+import util.RemoveDuplicates;
 
 public class ExtensionClassManager extends DefaultClassManager{
+
+    private static final boolean LOAD_STORAGE = true;
+
     @Override
     public void load(PrimitiveManager primManager) throws ExtensionException {
-        primManager.addPrimitive(Primitives.DELETE_BEHAVIOR, new DeleteBehavior());
+
+        if (LOAD_STORAGE) {
+            loadStorage(primManager);
+        }
+
         primManager.addPrimitive(Primitives.EXPORT_DBI_BEHAVIOR, new ExportDBIBehavior());
         primManager.addPrimitive(Primitives.IMPORT_DBI_BEHAVIOR, new ImportDBIBehavior());
         primManager.addPrimitive(Primitives.CREATE_ATOM, new CreateAtom());
@@ -22,12 +41,21 @@ public class ExtensionClassManager extends DefaultClassManager{
         primManager.addPrimitive(Primitives.CREATE_OPERATOR, new CreateOperator());
         primManager.addPrimitive(Primitives.CREATE_PROPOSITIONAL_FORMULA, new CreatePropositionFormula());
         primManager.addPrimitive(Primitives.CREATE_PROPOSITIONAL_ATOM, new CreatePropositionalAtom());
-        primManager.addPrimitive(Primitives.SET_DBI_BEHAVIOR, new SetDBIBehavior());
         primManager.addPrimitive(Primitives.CREATE_EMPTY_DBI, new CreateEmptyDBI());
-        primManager.addPrimitive(Primitives.INIT_DBI_STORAGE, new InitDBIStorage());
-
         primManager.addPrimitive(Primitives.REMOVE_DUPLICATES, new RemoveDuplicates()
         );
 
+    }
+
+    /**
+     * This method helps binding the object related to the storage management.
+     * @param primManager
+     * @throws ExtensionException
+     */
+    private void loadStorage(PrimitiveManager primManager) throws ExtensionException {
+        DBIStorage storage = new DBIStorage();
+        primManager.addPrimitive(Primitives.INIT_DBI_STORAGE, storage);
+        primManager.addPrimitive(Primitives.DELETE_BEHAVIOR, new DeleteBehavior(storage));
+        primManager.addPrimitive(Primitives.SET_DBI_BEHAVIOR, new AddDBIBehavior(storage));
     }
 }

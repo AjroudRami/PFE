@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent;
 
 import kobdig.agent.Agent;
 import org.nlogo.api.Argument;
@@ -15,7 +15,7 @@ import org.nlogo.core.SyntaxJ;
  */
 public class CreateEmptyDBI implements Reporter {
     @Override
-    public Object report(Argument[] args, Context context) throws ExtensionException {
+    public Object report(Argument[] args, Context context) {
         Agent agent = new Agent();
         return agent;
     }

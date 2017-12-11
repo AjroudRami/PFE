@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent.io;
 
 import org.nlogo.api.Argument;
 import org.nlogo.api.Command;
@@ -16,6 +16,6 @@ public class ExportDBIBehavior implements Command {
 
     @Override
     public void perform(Argument[] args, Context context) throws ExtensionException {
-        //TODO
+        //TODO export DBI behavior file
     }
 }

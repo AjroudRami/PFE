@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent.behavior;
 
 import kobdig.agent.Agent;
 import kobdig.agent.Fact;
@@ -25,10 +25,10 @@ public class GetGoals implements Reporter {
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        FactSet facts = ((Agent) context.getAgent().getVariable(Primitives.dbi_index)).goals();
+        Agent dbi = (Agent) args[0].get();
+        FactSet facts = dbi.goals();
         Iterator<Fact> iterator = facts.factIterator();
         LogoListBuilder builder = new LogoListBuilder();
-        Agent agent = new Agent();
         while (iterator.hasNext()) {
             builder.add(iterator.next());
         }
@@ -42,6 +42,6 @@ public class GetGoals implements Reporter {
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(Syntax.ListType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.ListType());
     }
 }

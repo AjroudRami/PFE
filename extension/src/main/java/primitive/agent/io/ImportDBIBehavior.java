@@ -1,4 +1,4 @@
-package primitive;
+package primitive.agent.io;
 
 import kobdig.agent.Agent;
 import org.nlogo.api.Argument;
@@ -13,6 +13,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+
+/**
+ * This class implements a Reporter that is used to import DBI Agents from files.
+ */
 public class ImportDBIBehavior implements Reporter {
 
     @Override
@@ -20,6 +24,13 @@ public class ImportDBIBehavior implements Reporter {
         return SyntaxJ.reporterSyntax(Syntax.ReferenceType());
     }
 
+    /**
+     * This method takes one argument: a String representing the dbi agent filename to import.
+     * @param args
+     * @param context
+     * @return an Agent. It returns null if an IOException occurs.
+     * @throws ExtensionException if an IOException occurs
+     */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         String filename = args[0].getString();
