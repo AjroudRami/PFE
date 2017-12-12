@@ -63,7 +63,6 @@ end
 
 ;Fonction qui fait avancer le monde
 to go
-
   if (ticks >= 300) [
     stats-maison ;include-output.nls
     stop]
@@ -143,8 +142,8 @@ to abandon
    creation
 
   ask owner _nameOwner [
+    set numberOfexploitation numberofExploitation - 1
     set listExploitation (remove myself listExploitation)
-    set numberOfexploitation length listExploitation
    ]
 ;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
@@ -208,8 +207,7 @@ to chooseRentableExploitationAndExpand
   ;Necessary to loop
   let _nameOwner [landowner] of self
   let _goodprofit 0 ;
-  let _numb [numberOfExploitation] of myself
-  let _maxn [maxNumberExploit] of myself ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
+
   ;;Necessary to enlarge terrain
   let _watchTerrain 2
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
@@ -249,7 +247,11 @@ to chooseRentableExploitationAndExpand
         ]
       ]
     ]
+    let _numb [numberOfExploitation] of owner _nameOwner
+    let _maxn [maxNumberExploit] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
+
     if (_goodprofit > profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
+
   ]
 end
 
@@ -781,6 +783,23 @@ show-color?
 1
 1
 -1000
+
+BUTTON
+84
+346
+176
+379
+NIL
+show-color\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

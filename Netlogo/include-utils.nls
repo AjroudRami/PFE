@@ -68,3 +68,26 @@ let file "climatique.txt"
      file-close
 end
 
+to show-color
+  ifelse show-color?
+  [setupcolorlandscape];true
+  [
+    ask patches [
+    set pcolor black
+    ]
+    colorville
+    colorexploitation
+  ]  ;false
+end
+
+to colorville
+  ask towns[
+    foreach listofpatch [set pcolor white] 
+  ]
+end
+
+to colorexploitation
+  ask exploitations[
+    foreach listofpatches [set pcolor [color] of owner landowner]
+  ]
+end
