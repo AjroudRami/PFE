@@ -23,7 +23,7 @@ landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
 patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster]
 ;; agrological power : % d'influence des conditions climatiques
-exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction maxsizeofland totalaccesibility notRentable age]
+exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction maxsizeofland minsizeofland totalaccesibility notRentable age]
 ;;Ville et capitale
 towns-own [ location taille isCapital listofpatch ]
 
@@ -224,12 +224,13 @@ to chooseRentableExploitationAndExpand
         set symbolicvalue random(4)
         set totalproduction 0
         set maxsizeofland 10
+        set minsizeofland 2
         set notRentable 0
         set color [color] of owner landowner
         set totalaccesibility 0
         let _patchset  sort (patches with [cluster = _startcluster])
         if _patchset != 0 [set listofpatches sentence listofpatches _patchset]
-
+        repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
         set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
         set _goodprofit (totalproduction - totalaccesibility)

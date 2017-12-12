@@ -138,9 +138,11 @@ to create-exploitation [lOwner]
         set symbolicvalue random(4)
         set color [color] of owner landowner
         set totalproduction 0
+        set minsizeofland 2
         set maxsizeofland 10
         set notRentable 0
         set totalaccesibility 0
+        repeat minsizeofland [ enlarge2 listofpatches ]
           ask patch x y [set pcolor black]
         ask owner lOwner [
             set listExploitation lput myself listExploitation
@@ -190,6 +192,7 @@ to zero-exploitation
   set symbolicvalue 0 ; int
   set totalproduction 0 ; int
   set maxsizeofland 0 ; int length of listofpatches
+  set minsizeofland 2 ; int minimum size of this type of expoloitation ( Farm = 2 , Villa = 10)
   set totalaccesibility 0 ; int
   set notRentable 0 ; int Years of being not rentable
   set age 0 ; int
