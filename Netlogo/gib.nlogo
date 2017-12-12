@@ -1,5 +1,5 @@
 ;Ajout d'extension java
-extensions[matrix]
+extensions[dbi_agents]
 ;Ajout de fichiers "foo.nls" contenant du code NetLogo
 __includes["include-output.nls" "include-setup.nls" "include-utils.nls"]
 
@@ -78,7 +78,7 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Starting T1 functions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;;TRY DBI AGENTS
 
 
 to stuffBeforeOwnersCalcul
@@ -132,9 +132,9 @@ to abandon
   ask owner _nameOwner [
     set listExploitation (remove myself listExploitation)
    ]
-
+;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
-    set pcolor (15 + (landscapeType * 20))
+    set pcolor (15 + (landscapeType * 20)) ;donne la couleur de base des patchs
     set exploited false
     set cluster nobody ]
 
@@ -160,6 +160,7 @@ to enlarge
   ]
 end
 
+;Agrandit un terrain d'une parcelle contigu au terrain de l'exploitation appellante
 to enlarge2 [listpatches]
   let watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
   if ( count watchterrain) > 0 [
@@ -192,9 +193,9 @@ to chooseRentableExploitationAndExpand
 
   ;Necessary to loop
   let _nameOwner [landowner] of self
-  let _goodprofit 0
+  let _goodprofit 0 ;
   let _numb [numberOfExploitation] of myself
-  let _maxn [maxNumberExploit] of myself
+  let _maxn [maxNumberExploit] of myself + 1 ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
   ;;Necessary to enlarge terrain
   let _watchTerrain 2
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
@@ -331,16 +332,15 @@ to checkProfitIncreased ;Augmentation du profit
     ]
   ]
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+923
+724
 -1
 -1
-13.0
+5.0
 1
 10
 1
@@ -350,10 +350,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--16
-16
--16
-16
+-70
+70
+-70
+70
 0
 0
 1

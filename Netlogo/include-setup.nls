@@ -169,7 +169,7 @@ end
 ;Fonction qui associe une couleur aux patches selon leur "LandscapeType"
 to setupcolorlandscape
   ask patches[
-    set pcolor (15 + (landscapeType * 20))
+   ; set pcolor (15 + (landscapeType * 20))
   ]
 end
 
