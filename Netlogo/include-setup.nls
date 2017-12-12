@@ -10,16 +10,7 @@ end
 
 ;Fonction qui sert à mettre en place les villes
 to setupTown
-  create-towns 1 [
-    set color black
-    setxy random-xcor random-ycor
-    set shape "flag"
-    let x (patch-set patch-here neighbors)
-    ask x[
-      set pcolor white
-      set exploited true
-    ]
-  ]
+  doGis
 end
 
 ;Fontion qui met donne aux patchs leur types de paysages
@@ -52,16 +43,15 @@ to setupClimatique
 
   ask patches [
     set climat clim
-    set exploited false
     set agrologicalPower (item climat(item landscapeType climatique-data))
     ]
 end
 
 ;Crée les "owners" et associe un rang à chacun d'eux
 to setupLandOwners
-  create-owners (5)
+  create-owners (1)
   ask owners [
-    set rank item random(3) ["farmers" "rich" "aristocrat"]
+    set rank item 2 ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
     set listExploitation []
   ]
@@ -69,9 +59,11 @@ end
 
 ;;Associe à chaque owners : son pouvoir éco, son nombre max d'éablissements, son rayon d'action (selon son rang)
 to setupmoney
-  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 5]
+  ask owners[
+  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 1]
   [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 15]
     [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
+  ]
 end
 
 ;Associe un nombre aléatoire d'exploitations à chaque owners et
@@ -99,7 +91,7 @@ end
 to setupAgricultureStructure
   ask exploitations[
     let x random(100)
-    if x < 50 [ foreach listofpatches [set yearsExploited true]
+    if x < 50 [ foreach listofpatches [set haveTools true]
     ]
   ]
 end
@@ -146,9 +138,11 @@ to create-exploitation [lOwner]
         set symbolicvalue random(4)
         set color [color] of owner landowner
         set totalproduction 0
-        set sizeofland 1
+        set minsizeofland 2
+        set maxsizeofland 10
         set notRentable 0
         set totalaccesibility 0
+        repeat minsizeofland [ enlarge2 listofpatches ]
           ask patch x y [set pcolor black]
         ask owner lOwner [
             set listExploitation lput myself listExploitation
@@ -169,7 +163,7 @@ end
 ;Fonction qui associe une couleur aux patches selon leur "LandscapeType"
 to setupcolorlandscape
   ask patches[
-   ; set pcolor (15 + (landscapeType * 20))
+    set pcolor (15 + (landscapeType * 20))
   ]
 end
 
@@ -197,7 +191,8 @@ to zero-exploitation
   set listofpatches [] ; Netlogo List containing patches
   set symbolicvalue 0 ; int
   set totalproduction 0 ; int
-  set sizeofland 0 ; int length of listofpatches
+  set maxsizeofland 0 ; int length of listofpatches
+  set minsizeofland 2 ; int minimum size of this type of expoloitation ( Farm = 2 , Villa = 10)
   set totalaccesibility 0 ; int
   set notRentable 0 ; int Years of being not rentable
   set age 0 ; int
