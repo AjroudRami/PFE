@@ -126,13 +126,21 @@ to improve
   addStructure ; include-utils
 end
 
+to creation
+  let tmp [numberOfExploitation] of myself
+  let maxx [maxNumberExploit] of myself
+  if tmp < maxx [
+    chooseRentableExploitationAndExpand
+  ]
+end
+
 ;;Si on abandonne une exploitation Alors on en crée une autre
 ;;dans le rayon d'action par rapport à son ancienne exploitation
 ;;puis on tue l'exploitation courante (non rentable)
 to abandon
   let _nameOwner [landowner] of self
 
-   chooseRentableExploitationAndExpand
+   creation
 
   ask owner _nameOwner [
     set listExploitation (remove myself listExploitation)
@@ -284,7 +292,7 @@ end
 to checkProfitDecreasedFarmer ;Baisse de profit
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain ]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
@@ -324,7 +332,7 @@ end
 to checkProfitEquivalent ; Profit Equivalent
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      ifelse (totalproduction - totalaccesibility) > profit [ maintain creation]
       [ ifelse symbolicvalue > 0 [ maintain] [abandon]
     ]
   ]
@@ -335,7 +343,7 @@ to checkProfitIncreased ;Augmentation du profit
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse (totalproduction - totalaccesibility) < profit [ maintain improve]
-      [ if length listofpatches < maxsizeofland [enlarge2 listofpatches]]
+      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][creation]]
     ]
   ]
 end
