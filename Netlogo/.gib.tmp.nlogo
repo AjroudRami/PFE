@@ -201,7 +201,7 @@ to chooseRentableExploitationAndExpand
   let _nameOwner [landowner] of self
   let _goodprofit 0 ;
   let _numb [numberOfExploitation] of myself
-  let _maxn [maxNumberExploit] of myself ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
+  let _maxn [maxNumberExploit] of myself +  ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
   ;;Necessary to enlarge terrain
   let _watchTerrain 2
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
