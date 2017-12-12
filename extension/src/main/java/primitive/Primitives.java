@@ -33,6 +33,5 @@ public class Primitives {
     public static final String NEGATE_FACT = "negate-fact";
     public static final String GET_FORMULA_FROM_FACT = "formula-from-fact";
 
-
     public static final String REMOVE_DUPLICATES = "remove-duplicates";
 }

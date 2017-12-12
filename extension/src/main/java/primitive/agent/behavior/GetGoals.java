@@ -4,7 +4,6 @@ import kobdig.agent.Agent;
 import kobdig.agent.Fact;
 import kobdig.agent.FactSet;
 import org.nlogo.api.*;
-import org.nlogo.core.LogoList;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
@@ -37,11 +36,12 @@ public class GetGoals implements Reporter {
 
     /**
      * It takes no arguments
-     *And returns a LogoList of Fact
+     * And returns a LogoList of Fact
+     *
      * @return LogoList<Fact> type
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.ListType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType()}, Syntax.ListType());
     }
 }

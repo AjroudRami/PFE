@@ -4,19 +4,19 @@ import kobdig.agent.Agent;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Command;
 import org.nlogo.api.Context;
-import org.nlogo.api.ExtensionException;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class DBIStorage implements Command{
+public class DBIStorage implements Command {
 
     private Map<String, Agent> agents;
 
     @Override
-    public void perform(Argument[] args, Context context) throws ExtensionException {
+    public void perform(Argument[] args, Context context) {
         this.agents = new HashMap<>();
     }
 
@@ -27,6 +27,7 @@ public class DBIStorage implements Command{
 
     /**
      * This method update an agent in the storage
+     *
      * @param name
      * @param agent
      */
@@ -36,6 +37,7 @@ public class DBIStorage implements Command{
 
     /**
      * Register a new agent, registration only works if the given name is not used.
+     *
      * @param name
      * @param agent
      */
@@ -46,6 +48,7 @@ public class DBIStorage implements Command{
     /**
      * Return an Optional object corresponding to the given name.
      * If the agent name is not registred, it returns Optional.empty()
+     *
      * @param name
      * @return
      */
@@ -62,6 +65,7 @@ public class DBIStorage implements Command{
 
     /**
      * Remove an agent from the storage
+     *
      * @param name
      */
     public void remove(String name) {

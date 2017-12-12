@@ -20,6 +20,6 @@ public class CreateFactFromFormula implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType()}, Syntax.WildcardType());
     }
 }

@@ -15,6 +15,7 @@ public class GetFormulaFromFact implements Reporter {
 
     /**
      * It takes a Fact as argument and returns a Formula
+     *
      * @param args
      * @param context
      * @return
@@ -28,6 +29,6 @@ public class GetFormulaFromFact implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[] {Syntax.ReferenceType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType()}, Syntax.WildcardType());
     }
 }

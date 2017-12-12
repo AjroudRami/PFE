@@ -15,6 +15,7 @@ public class CreateOperator implements Reporter {
     /**
      * Depending on the number of arguments, the user can declare a standard operator (AND, OR, NOT, XOR),
      * or create a new one. If declaring a new operator, the user must give the name and the arity of the operator.
+     *
      * @param args
      * @param context
      * @return
@@ -42,6 +43,7 @@ public class CreateOperator implements Reporter {
 
     /**
      * Create a standard operator from its String name
+     *
      * @param name
      * @return
      */

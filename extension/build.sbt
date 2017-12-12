@@ -8,7 +8,7 @@ scalaVersion           := "2.11.7"
 
 scalaSource in Compile := baseDirectory.value / "src"
 
-unmanagedSourceDirectories in Compile += baseDirectory.value / "kobdig/src"
+unmanagedSourceDirectories in Compile += baseDirectory.value / "kobdig/src/main/java"
 
 scalacOptions          ++= Seq("-deprecation", "-unchecked", "-Xfatal-warnings", "-encoding", "us-ascii")
 

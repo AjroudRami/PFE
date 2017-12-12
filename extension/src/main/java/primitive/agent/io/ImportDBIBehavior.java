@@ -21,11 +21,12 @@ public class ImportDBIBehavior implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.StringType()}, Syntax.WildcardType());
     }
 
     /**
      * This method takes one argument: a String representing the dbi agent filename to import.
+     *
      * @param args
      * @param context
      * @return an Agent. It returns null if an IOException occurs.

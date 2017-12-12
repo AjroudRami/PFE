@@ -26,10 +26,11 @@ public class CreateAtom implements Reporter {
     /**
      * This reporter only takes one argument, the name of the atom as a string, and returns a reference to the Atom
      * object
+     *
      * @return the Atom
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.StringType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.StringType()}, Syntax.WildcardType());
     }
 }

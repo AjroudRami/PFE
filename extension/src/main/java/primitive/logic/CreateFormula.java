@@ -18,10 +18,11 @@ public class CreateFormula implements Reporter {
     /**
      * This reporter takes as arguments:
      * <ul>
-     *     <li>an Operator of arity n</li>
-     *     <li>a LogoList of Formula of size n (the operator's arity)</li>
+     * <li>an Operator of arity n</li>
+     * <li>a LogoList of Formula of size n (the operator's arity)</li>
      * </ul>
      * It returns a reference to the create Formula object
+     *
      * @param args
      * @param context
      * @return
@@ -42,6 +43,6 @@ public class CreateFormula implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType(), Syntax.ListType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType(), Syntax.ListType()}, Syntax.WildcardType());
     }
 }

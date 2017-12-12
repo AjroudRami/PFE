@@ -9,7 +9,6 @@ import org.nlogo.api.Context;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
-import sun.management.resources.agent;
 
 /**
  * This class implements a primitive (command) used to update the agent beliefs.
@@ -19,6 +18,7 @@ public class UpdateBelief implements Command {
     /**
      * This method is called whenever the command is used.  check {@link Command#getSyntax()} getSyntax()} for more information
      * about its Netlogo Syntax.
+     *
      * @param args
      * @param context
      * @throws ExtensionException
@@ -36,10 +36,11 @@ public class UpdateBelief implements Command {
      * A Reference to an {@link Agent}
      * A Reference to a {@link Fact}
      * A Number that is the truthdegree of this fact
+     *
      * @return {@link Syntax}
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.commandSyntax(new int[]{Syntax.ReferenceType(), Syntax.ReferenceType(), Syntax.NumberType()});
+        return SyntaxJ.commandSyntax(new int[]{Syntax.WildcardType(), Syntax.WildcardType(), Syntax.NumberType()});
     }
 }

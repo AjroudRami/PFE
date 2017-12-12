@@ -21,7 +21,7 @@ public class Main {
         mainFarmer();
     }
 
-    public static void mainFarmer(){
+    public static void mainFarmer() {
         String pathname = "./extension/src/main/java/farmer.apl";
         File file = new File(pathname);
 
@@ -32,9 +32,9 @@ public class Main {
             PropositionalFormula via = new PropositionalFormula(new PropositionalAtom("viable"));
             PropositionalFormula fert = new PropositionalFormula(new PropositionalAtom("fertile"));
             PropositionalFormula acces = new PropositionalFormula(new PropositionalAtom("accessible"));
-            PropositionalFormula nvia = new PropositionalFormula(Operator.NOT,via);
-            PropositionalFormula nfert = new PropositionalFormula(Operator.NOT,fert);
-            PropositionalFormula nacces = new PropositionalFormula(Operator.NOT,acces);
+            PropositionalFormula nvia = new PropositionalFormula(Operator.NOT, via);
+            PropositionalFormula nfert = new PropositionalFormula(Operator.NOT, fert);
+            PropositionalFormula nacces = new PropositionalFormula(Operator.NOT, acces);
             //Passer la formule de l'agent avec une certain degré de confiance
             agent.updateBeliefs(new Fact(acces), new TruthDegree(0.2));
             agent.updateBeliefs(new Fact(fert), new TruthDegree(0.25));
@@ -47,7 +47,7 @@ public class Main {
             TruthDegree t;
             FactSet g = agent.goals();
             Iterator<Fact> i = g.factIterator();
-            while(i.hasNext()){
+            while (i.hasNext()) {
                 Fact f = i.next();
 
                 t = g.membership(f);
@@ -57,7 +57,8 @@ public class Main {
             e.printStackTrace();
         }
     }
-    public static void maingroumet(){
+
+    public static void maingroumet() {
         String pathname = "./extension/src/main/java/gourmet.apl";
 
         File file = new File(pathname);

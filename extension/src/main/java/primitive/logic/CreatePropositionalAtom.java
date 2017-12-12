@@ -35,6 +35,6 @@ public class CreatePropositionalAtom implements Reporter {
      */
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.StringType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.StringType()}, Syntax.WildcardType());
     }
 }

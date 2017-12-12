@@ -13,6 +13,7 @@ public class GetFactBeliefFactor implements Reporter {
 
     /**
      * This method takes an agent and a fact and returns the belief factor of the agent.
+     *
      * @param args
      * @param context
      * @return
@@ -27,6 +28,6 @@ public class GetFactBeliefFactor implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType(), Syntax.ReferenceType()}, Syntax.NumberType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType(), Syntax.WildcardType()}, Syntax.NumberType());
     }
 }

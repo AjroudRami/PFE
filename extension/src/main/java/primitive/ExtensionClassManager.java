@@ -1,8 +1,11 @@
 package primitive;
 
+import business.TestPrim;
+import business.TestPrim2;
 import org.nlogo.api.DefaultClassManager;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.api.PrimitiveManager;
+import primitive.agent.CreateEmptyDBI;
 import primitive.agent.behavior.GetFactBeliefFactor;
 import primitive.agent.behavior.GetFactDesireFactor;
 import primitive.agent.behavior.GetGoals;
@@ -10,13 +13,12 @@ import primitive.agent.behavior.UpdateBelief;
 import primitive.agent.io.ExportDBIBehavior;
 import primitive.agent.io.ImportDBIBehavior;
 import primitive.agent.storage.AddDBIBehavior;
-import primitive.agent.CreateEmptyDBI;
 import primitive.agent.storage.DBIStorage;
 import primitive.agent.storage.DeleteBehavior;
 import primitive.logic.*;
 import util.RemoveDuplicates;
 
-public class ExtensionClassManager extends DefaultClassManager{
+public class ExtensionClassManager extends DefaultClassManager {
 
     private static final boolean LOAD_STORAGE = true;
 
@@ -45,18 +47,22 @@ public class ExtensionClassManager extends DefaultClassManager{
         primManager.addPrimitive(Primitives.REMOVE_DUPLICATES, new RemoveDuplicates());
         primManager.addPrimitive(Primitives.NEGATE_FACT, new NegateFact());
         primManager.addPrimitive(Primitives.GET_FORMULA_FROM_FACT, new GetFormulaFromFact());
+        primManager.addPrimitive("test", new TestPrim());
+        primManager.addPrimitive("test2", new TestPrim2());
 
     }
 
     /**
      * This method helps binding the object related to the storage management.
+     *
      * @param primManager
      * @throws ExtensionException
      */
-    private void loadStorage(PrimitiveManager primManager) throws ExtensionException {
+    private void loadStorage(PrimitiveManager primManager) {
         DBIStorage storage = new DBIStorage();
         primManager.addPrimitive(Primitives.INIT_DBI_STORAGE, storage);
         primManager.addPrimitive(Primitives.DELETE_BEHAVIOR, new DeleteBehavior(storage));
         primManager.addPrimitive(Primitives.SET_DBI_BEHAVIOR, new AddDBIBehavior(storage));
+        primManager.addPrimitive(Primitives.ADD_BEHAVIOR, new AddDBIBehavior(storage));
     }
 }

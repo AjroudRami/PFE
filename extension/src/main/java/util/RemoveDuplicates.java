@@ -13,6 +13,7 @@ public class RemoveDuplicates implements Reporter {
     /**
      * This method takes a LogoList of Patches as an argument and returns new Logolist where duplicates
      * references have been removed.
+     *
      * @param args
      * @param context
      * @return
@@ -24,8 +25,8 @@ public class RemoveDuplicates implements Reporter {
         LogoList list = args[0].getList();
         LogoListBuilder builder = new LogoListBuilder();
 
-        for(int i = 0; i < list.length(); i ++) {
-            if (!before(list, i)){
+        for (int i = 0; i < list.length(); i++) {
+            if (!before(list, i)) {
                 builder.add(list.get(i));
             }
         }
@@ -39,6 +40,7 @@ public class RemoveDuplicates implements Reporter {
 
     /**
      * This method returns true if the current Patch is found in the previous elements of the list.
+     *
      * @param list
      * @param index
      * @return
@@ -46,9 +48,9 @@ public class RemoveDuplicates implements Reporter {
     private boolean before(LogoList list, int index) {
         Patch patch = (Patch) list.get(index);
         long id = patch.id();
-        for(int i = index - 1; i > 0; i--) {
-            long secId = ((Patch)list.get(i)).id();
-            if(id == secId) {
+        for (int i = index - 1; i > 0; i--) {
+            long secId = ((Patch) list.get(i)).id();
+            if (id == secId) {
                 return true;
             }
         }

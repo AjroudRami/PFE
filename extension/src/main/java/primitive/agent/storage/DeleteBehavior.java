@@ -1,9 +1,11 @@
 package primitive.agent.storage;
 
-import org.nlogo.api.*;
+import org.nlogo.api.Argument;
+import org.nlogo.api.Command;
+import org.nlogo.api.Context;
+import org.nlogo.api.ExtensionException;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
-import primitive.agent.storage.DBIStorage;
 
 public class DeleteBehavior implements Command {
 

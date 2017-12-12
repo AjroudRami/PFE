@@ -16,6 +16,7 @@ public class CreateFormulaFromAtom implements Reporter {
 
     /**
      * This method creates a Formula object from an Atom and returns a reference to the created Formula.
+     *
      * @param args
      * @param context
      * @return
@@ -30,6 +31,6 @@ public class CreateFormulaFromAtom implements Reporter {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.ReferenceType()}, Syntax.ReferenceType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType()}, Syntax.WildcardType());
     }
 }

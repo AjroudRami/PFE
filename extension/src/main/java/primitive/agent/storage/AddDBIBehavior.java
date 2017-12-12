@@ -1,10 +1,12 @@
 package primitive.agent.storage;
 
 import kobdig.agent.Agent;
-import org.nlogo.api.*;
+import org.nlogo.api.Argument;
+import org.nlogo.api.Command;
+import org.nlogo.api.Context;
+import org.nlogo.api.ExtensionException;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
-import primitive.agent.storage.DBIStorage;
 
 /**
  * This class implements a primitive used to store a DBI Agent in the DBIStorage object.
@@ -19,6 +21,7 @@ public class AddDBIBehavior implements Command {
 
     /**
      * It takes an Agent and a String (the agent's name) as arguments.
+     *
      * @param args
      * @param context
      * @throws ExtensionException
@@ -32,6 +35,6 @@ public class AddDBIBehavior implements Command {
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.commandSyntax(new int[]{Syntax.ReferenceType(), Syntax.StringType()});
+        return SyntaxJ.commandSyntax(new int[]{Syntax.WildcardType(), Syntax.StringType()});
     }
 }
