@@ -1,4 +1,4 @@
-;Contient des fonctions utilitaires aux modèles
+;Contient des fonctions utilitaires au modèle
 ;et les attributs qui leurs sont nécessaires
 
 ;Définition des variables globales necessaires aux fonctions "Utilitaires"
@@ -22,7 +22,7 @@ end
 
 to addStructure
   let setpatch (patch-set listofpatches)
-  ask setpatch [
+  ask setpatch with [haveTools = false] [
     set haveTools true
   ]
   set managed managed + 1
