@@ -16,6 +16,8 @@ import org.nlogo.core.SyntaxJ;
  * an atomic concept (description logic) ...
  */
 public class CreateAtom implements Reporter {
+
+
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         String atomName = args[0].getString();

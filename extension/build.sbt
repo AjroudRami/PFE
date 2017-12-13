@@ -15,3 +15,6 @@ scalacOptions          ++= Seq("-deprecation", "-unchecked", "-Xfatal-warnings",
 netLogoVersion := "6.0.2"
 
 fork in run := true
+
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11"
+
