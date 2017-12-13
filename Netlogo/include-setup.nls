@@ -5,7 +5,8 @@
 
 ;Fonction qui définit la valeur du seuil High/Low profit
 to setup-profit
-  set profit 20
+  set profit-farm 600
+  set profit-villa 6000
 end
 
 ;Fonction qui sert à mettre en place les villes
@@ -49,9 +50,10 @@ end
 
 ;Crée les "owners" et associe un rang à chacun d'eux
 to setupLandOwners
-  create-owners (1)
+  create-owners (5)
   ask owners [
-    set rank item 2 ["farmers" "rich" "aristocrat"]
+    set color random(100)
+    set rank item random(3) ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
     set listExploitation []
   ]
@@ -70,11 +72,11 @@ end
 ;les crée aléaoirement dans le monde
 to setupExploitationPerOwners
   ask owners [
-  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
-  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
-  [set numberOfExploitation (random(4) + 1)]]
+  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1) set minNumberVilla 0]
+  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1) set minNumberVilla 1]
+  [set numberOfExploitation (random(4) + 1) set minNumberVilla 3]]
 
-  repeat numberOfExploitation [create-exploitation who]
+  repeat maxNumberExploit [create-exploitation who]
   ]
 
  end
@@ -133,21 +135,20 @@ to create-exploitation [lOwner]
         sprout-exploitations 1 [
         set landowner lOwner
         set shape "house"
-        set typeOfExploitation 0
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set color [color] of owner landowner
         set totalproduction 0
-        set minsizeofland 2
-        set maxsizeofland 10
+        ifelse not-enough-villa? [do-villa][do-farm] 
+        repeat minsizeofland [ enlarge2 listofpatches ]
         set notRentable 0
         set totalaccesibility 0
-        repeat minsizeofland [ enlarge2 listofpatches ]
-          ask patch x y [set pcolor black]
+         ask patch x y [set pcolor black]
         ask owner lOwner [
             set listExploitation lput myself listExploitation
-            ifelse ([typeOfExploitation] of myself) = 0 [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+            ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
         ]
+          show length listofpatches
       ]
       ][]
   ]

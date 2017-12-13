@@ -17,7 +17,7 @@ breed [towns town]
 ;Définition des attributs des différents agents
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -52,8 +52,9 @@ to setup
   setupClimatique
 
   setupLandOwners
-  setupExploitationPerOwners
   setupmoney
+  setupExploitationPerOwners
+
   setupSymbolic
   setupAgricultureStructure
   setupYearsOfExploitation
@@ -207,6 +208,8 @@ to chooseRentableExploitationAndExpand
   ;Necessary to loop
   let _nameOwner [landowner] of self
   let _goodprofit 0 ;
+  let _profit 0 ; valeur servant à definir si le profit que nous rapporte une nouvelle exploitation est suffisant pour en creer de nouveau une autre.
+
 
   ;;Necessary to enlarge terrain
   let _watchTerrain 2
@@ -214,28 +217,23 @@ to chooseRentableExploitationAndExpand
   if(count _probablygood > _watchTerrain) [
     let _terrain max-n-of _watchTerrain _probablygood [production]
     let _startcluster one-of _terrain
-    ask _startcluster [
-      set cluster self
-      set exploited true
-      set pcolor [color] of owner _nameOwner
-      grow-cluster]
+
     ;foreach terrain [set exploited true]
     ask _startcluster [
+      set pcolor [color] of owner _nameOwner
+      set exploited true
       sprout-exploitations 1 [
         set createdEx createdEx + 1
         set landowner _nameOwner
         set shape "house"
-        set typeOfExploitation "farm"
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set totalproduction 0
-        set maxsizeofland 10
-        set minsizeofland 2
         set notRentable 0
         set color [color] of owner landowner
         set totalaccesibility 0
-        let _patchset  sort (patches with [cluster = _startcluster])
-        if _patchset != 0 [set listofpatches sentence listofpatches _patchset]
+        ifelse not-enough-villa? [do-villa][do-farm]
+        ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
         repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
         set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
@@ -249,8 +247,8 @@ to chooseRentableExploitationAndExpand
     ]
     let _numb [numberOfExploitation] of owner _nameOwner
     let _maxn [maxNumberExploit] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
-
-    if (_goodprofit > profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
+    ;goodprofit est le profit que rapporte cette nouvelle exploitation
+    if (_goodprofit > _profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
 
   ]
 end
@@ -292,9 +290,11 @@ end
 
 ;Choix concernant les exploitations des fermiers
 to checkProfitDecreasedFarmer ;Baisse de profit
+  let _profit 0
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain ]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain ]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
@@ -302,9 +302,11 @@ to checkProfitDecreasedFarmer ;Baisse de profit
 end
 
 to checkProfitEquivalentFarmer ; Profit Equivalent
+  let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
@@ -312,9 +314,11 @@ to checkProfitEquivalentFarmer ; Profit Equivalent
 end
 
 to checkProfitIncreasedFarmer ;Augmentation Profit
+  let _profit 0
 foreach listExploitation [
     [exploit] -> ask exploit [
-      if (totalproduction - totalaccesibility) > profit [if length listofpatches < maxsizeofland [enlarge2 listofpatches]]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      if (totalproduction - totalaccesibility) > _profit [if length listofpatches < maxsizeofland [enlarge2 listofpatches]]
     ]
   ]
 end
@@ -322,9 +326,11 @@ end
 ;Choix concernant les exploitations des aristocrates et des Big landowners
 ;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
 to checkProfitDecreased ; Baisse de profit
+  let _profit 0
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [maintain]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) > _profit [maintain]
       [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
     ]
   ]
@@ -332,9 +338,11 @@ to checkProfitDecreased ; Baisse de profit
 end
 
 to checkProfitEquivalent ; Profit Equivalent
+  let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) > profit [ maintain creation]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain creation]
       [ ifelse symbolicvalue > 0 [ maintain] [abandon]
     ]
   ]
@@ -342,9 +350,11 @@ to checkProfitEquivalent ; Profit Equivalent
 end
 
 to checkProfitIncreased ;Augmentation du profit
+  let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse (totalproduction - totalaccesibility) < profit [ maintain improve]
+      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve]
       [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][creation]]
     ]
   ]
@@ -780,7 +790,7 @@ SWITCH
 293
 show-color?
 show-color?
-1
+0
 1
 -1000
 
@@ -791,6 +801,23 @@ BUTTON
 379
 NIL
 show-color\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+29
+123
+92
+156
+EZ
+clear\nload-climatique\nsetup
 NIL
 1
 T
