@@ -70,9 +70,9 @@ end
 ;les crée aléaoirement dans le monde
 to setupExploitationPerOwners
   ask owners [
-  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1)]
-  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1)]
-  [set numberOfExploitation (random(4) + 1)]]
+  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1) set maxNumberVilla 0]
+  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1) set maxNumberVilla 1]
+  [set numberOfExploitation (random(4) + 1) set maxNumberVilla 3]]
 
   repeat numberOfExploitation [create-exploitation who]
   ]
@@ -133,21 +133,20 @@ to create-exploitation [lOwner]
         sprout-exploitations 1 [
         set landowner lOwner
         set shape "house"
-        set typeOfExploitation 0
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set color [color] of owner landowner
         set totalproduction 0
-        set minsizeofland 2
-        set maxsizeofland 10
+        ifelse too-much-villa? [do-farm][do-villa] 
+        repeat minsizeofland [ enlarge2 listofpatches ]
         set notRentable 0
         set totalaccesibility 0
-        repeat minsizeofland [ enlarge2 listofpatches ]
-          ask patch x y [set pcolor black]
+         ask patch x y [set pcolor black]
         ask owner lOwner [
             set listExploitation lput myself listExploitation
-            ifelse ([typeOfExploitation] of myself) = 0 [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+            ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
         ]
+          show length listofpatches
       ]
       ][]
   ]

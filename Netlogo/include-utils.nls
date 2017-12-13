@@ -82,12 +82,36 @@ end
 
 to colorville
   ask towns[
-    foreach listofpatch [set pcolor white] 
+    ask (patch-set listofpatch) [set pcolor white] 
   ]
 end
 
 to colorexploitation
   ask exploitations[
-    foreach listofpatches [set pcolor [color] of owner landowner]
+    ask (patch-set listofpatches) [set pcolor [color] of owner [landowner] of myself]
+    ask patch-here [set pcolor black]
   ]
+end
+
+
+;Appeler par une exploitation
+to-report too-much-villa?
+  let _owner owner landowner 
+  let _nbvilla count (turtle-set [listExploitation] of _owner) with [typeOfExploitation = "villa"]
+  
+  report _nbvilla > ([maxNumberVilla] of _owner)
+end
+
+;Appeler par une exploitation
+to do-farm
+  set typeOfExploitation "farm"
+  set minsizeofland 2
+  set maxsizeofland 10
+end
+
+;Appeler par une exploitation
+to do-villa
+  set typeOfExploitation "villa"
+  set minsizeofland 11
+  set maxsizeofland 100
 end

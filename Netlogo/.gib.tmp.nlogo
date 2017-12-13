@@ -17,7 +17,7 @@ breed [towns town]
 ;Définition des attributs des différents agents
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation maxNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -214,28 +214,24 @@ to chooseRentableExploitationAndExpand
   if(count _probablygood > _watchTerrain) [
     let _terrain max-n-of _watchTerrain _probablygood [production]
     let _startcluster one-of _terrain
-    ask _startcluster [
-      set cluster self
-      set exploited true
-      set pcolor [color] of owner _nameOwner
-      grow-cluster]
+
     ;foreach terrain [set exploited true]
     ask _startcluster [
+      set pcolor [color] of owner _nameOwner
+      set exploited true
       sprout-exploitations 1 [
         set createdEx createdEx + 1
         set landowner _nameOwner
         set shape "house"
-        set typeOfExploitation "farm"
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set totalproduction 0
-        set maxsizeofland 10
-        set minsizeofland 2
         set notRentable 0
         set color [color] of owner landowner
         set totalaccesibility 0
-        let _patchset  sort (patches with [cluster = _startcluster])
-        if _patchset != 0 [set listofpatches sentence listofpatches _patchset]
+        set typeOfExploitation "farm"
+        set maxsizeofland 10
+        set minsizeofland 2
         repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
         set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
@@ -791,6 +787,23 @@ BUTTON
 379
 NIL
 show-color\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+29
+123
+92
+156
+EZ
+clear\nload-climatique\nsetup
 NIL
 1
 T
