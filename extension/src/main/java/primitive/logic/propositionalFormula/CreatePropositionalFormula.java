@@ -33,12 +33,15 @@ public class CreatePropositionalFormula implements Reporter {
             int size = args.length - 1;
             PropositionalFormula[] formulas = new PropositionalFormula[size];
             LOGGER.log(Level.INFO, "creating array of PropositionalFormula of size: " + size);
-            for (int i = 1; i < size; i++) {
-                formulas[i] = (PropositionalFormula) args[i].get();
+            for (int i = 0; i < size; i++) {
+                LOGGER.log(Level.INFO, "Getting formula " + i + " from args");
+                formulas[i] = (PropositionalFormula) args[i + 1].get();
                 LOGGER.log(Level.INFO, "item " + i + " " + formulas[i].toString());
             }
+            LOGGER.log(Level.INFO, "Formulas collected, Creating PropositionalFormula");
             propositionalFormula = new PropositionalFormula(o, formulas);
         } catch (ClassCastException c) {
+            LOGGER.log(Level.SEVERE, "Error while creating PropositionalFormula, ClassCastException");
             throw new ExtensionException(c.getMessage());
         }
         return propositionalFormula;
