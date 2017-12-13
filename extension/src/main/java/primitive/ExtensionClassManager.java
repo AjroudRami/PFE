@@ -4,10 +4,7 @@ import org.nlogo.api.DefaultClassManager;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.api.PrimitiveManager;
 import primitive.agent.CreateEmptyDBI;
-import primitive.agent.behavior.GetBeliefs;
-import primitive.agent.behavior.GetDesires;
-import primitive.agent.behavior.GetGoals;
-import primitive.agent.behavior.UpdateBelief;
+import primitive.agent.behavior.*;
 import primitive.agent.io.ExportDBIBehavior;
 import primitive.agent.io.ImportDBIBehavior;
 import primitive.agent.storage.AddDBIBehavior;
@@ -16,13 +13,16 @@ import primitive.agent.storage.DeleteBehavior;
 import primitive.agent.storage.UpdateDBIBehavior;
 import primitive.logic.atom.CreateAtom;
 import primitive.logic.fact.FromFormula;
+import primitive.logic.fact.GetFormula;
 import primitive.logic.fact.Negate;
+import primitive.logic.factSet.Membership;
 import primitive.logic.formula.CreateFormula;
 import primitive.logic.formula.FromAtom;
 import primitive.logic.formula.FromFact;
 import primitive.logic.operator.CreateOperator;
 import primitive.logic.propositionalAtom.CreatePropositionalAtom;
 import primitive.logic.propositionalFormula.CreatePropositionalFormula;
+import primitive.logic.truthdegree.DoubleValue;
 import util.RemoveDuplicates;
 
 public class ExtensionClassManager extends DefaultClassManager {
@@ -42,7 +42,7 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.IMPORT_DBI_BEHAVIOR, new ImportDBIBehavior());
         primManager.addPrimitive(Primitives.CREATE_ATOM, new CreateAtom());
         primManager.addPrimitive(Primitives.UPDATE_AGENT_BELIEF, new UpdateBelief());
-        primManager.addPrimitive(Primitives.GET_AGENT_GOALS, new GetGoals());
+        primManager.addPrimitive(Primitives.GET_AGENT_GOALS, new GetGoalLogoList());
         primManager.addPrimitive(Primitives.GET_FACT_DESIRE_FACTOR, new GetDesires());
         primManager.addPrimitive(Primitives.GET_FACT_BELIEF_FACTOR, new GetBeliefs());
         primManager.addPrimitive(Primitives.CREATE_PROPOSITION, new CreatePropositionalFormula());
@@ -57,6 +57,10 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.NEGATE_FACT, new Negate());
         primManager.addPrimitive(Primitives.GET_FORMULA_FROM_FACT, new FromFact());
         primManager.addPrimitive(Primitives.PROPOSITIONAL_FORMULA_FROM_ATOM, new primitive.logic.propositionalFormula.FromAtom());
+        primManager.addPrimitive(Primitives.GET_GOALS_FACTSET, new GetGoalFactSet());
+        primManager.addPrimitive(Primitives.FACTSET_MEMBERSHIP, new Membership());
+        primManager.addPrimitive(Primitives.FACT_GET_FORMULA, new GetFormula());
+        primManager.addPrimitive(Primitives.TRUTHDEGREE_DOUBLE_VALUE, new DoubleValue());
 
     }
 

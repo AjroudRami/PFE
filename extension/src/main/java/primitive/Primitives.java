@@ -24,9 +24,10 @@ public class Primitives {
     //methods
     public static final String UPDATE_AGENT_BELIEF = DBIAgent + SEP + "updateBelief";
     public static final String EXPORT_DBI_BEHAVIOR = DBIAgent + SEP + "export";
-    public static final String GET_AGENT_GOALS = DBIAgent + SEP + "getGoals";
+    public static final String GET_AGENT_GOALS = DBIAgent + SEP + "goalsAsLogoList";
     public static final String GET_FACT_DESIRE_FACTOR = DBIAgent + SEP + "desires";
     public static final String GET_FACT_BELIEF_FACTOR = DBIAgent + SEP + "believes";
+    public static final String GET_GOALS_FACTSET = DBIAgent + SEP + "goalsAsFactset";
 
 
     /**
@@ -78,6 +79,24 @@ public class Primitives {
     public static final String CREATE_FACT_FROM_FORMULA = Fact + SEP + "fromFormula";
     //Methods
     public static final String NEGATE_FACT = Fact + SEP + "negate";
+    public static final String FACT_GET_FORMULA = Fact + SEP + "getFormula";
+
+    /**
+     * FactSet primitives
+     */
+    //Name
+    public static final String Factset = "Factset";
+    //Methods
+    public static final String FACTSET_MEMBERSHIP = Factset + SEP + "membership";
+
+    /**
+     * TruthDegree primitives
+     */
+    //Name
+    public static final String Truthdegree = "TruthDegree";
+    //Methods
+    public static final String TRUTHDEGREE_DOUBLE_VALUE = Truthdegree + SEP + "doubleValue";
+
 
     /**
      * Utils

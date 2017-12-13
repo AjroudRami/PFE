@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * This class implements a primitive used to retreive the DBI Agent Goals
  */
-public class GetGoals implements Reporter {
+public class GetGoalLogoList implements Reporter {
 
     /**
      * This primitive returns a FactSet bundled in a LogoList object
@@ -35,7 +35,7 @@ public class GetGoals implements Reporter {
     }
 
     /**
-     * It takes no arguments
+     * It takes one argument, the DBIAgent
      * And returns a LogoList of Fact
      *
      * @return LogoList<Fact> type
