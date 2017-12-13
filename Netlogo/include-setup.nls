@@ -53,7 +53,7 @@ to setupLandOwners
   create-owners (5)
   ask owners [
     set color random(100)
-    set rank item random(3) ["farmers" "rich" "aristocrat"]
+    set rank item 2 ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
     set listExploitation []
   ]
@@ -63,7 +63,7 @@ end
 to setupmoney
   ask owners[
   ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 1]
-  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 15]
+  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 20] ;; 20 patch = 100ha
     [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
   ]
 end
@@ -118,41 +118,50 @@ ask owners[
 end
 
 ;Crée une exploitation pour l'owner "lOwner"
-;Appelée seulement lors du setup
+;Appelée seulement lors du setup t lorsqu'on abandonne une villa proche de la capital
 to create-exploitation [lOwner]
+  
+  let _capital one-of towns with [isCapital]
+  let _near 27
+  let _emplacementDispo patches with [distance _capital < _near and exploited = false]
+  let _emplacement one-of _emplacementDispo
+  let _anywhere one-of patches with [exploited = false]
+  let _r [rank] of owner lOwner
+  
+  ifelse _r = "aristocrat" [ let _exploit count (turtle-set listExploitation) with [distance one-of (towns with [isCapital]) < 27]
+    if _exploit != 0 [set _emplacement _anywhere]];true 
+ [set _emplacement _anywhere] ;false
+  ask _emplacement [
+    set exploited true
+    set pcolor black
+    sprout-exploitations 1 [
+      set landowner lOwner
+      set shape "house"
+      set listofpatches (list patch-here)
+      set symbolicvalue random(4)
+      set color [color] of owner landowner
+      set totalproduction 0
+      ifelse not-enough-villa? [do-villa][do-farm] 
+      repeat minsizeofland [ enlarge2 listofpatches ]
+      set notRentable 0
+      set totalaccesibility 0
+      ask owner lOwner [
+          set listExploitation lput myself listExploitation
+          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+      ] ;; fin ask owner
+    ] ;; fin sprout
+  ] ;; fin ask emplacement
+end
 
-  ;A améliorer pour prendre + de terrains autour de chaque exploitation
-
-  let created false
-  while [ not created ]
-  [
-    let x random-xcor
-    let y random-ycor
-      ask patch-at x y [
-      ifelse exploited = false [
-        set exploited true
-        set created true
-        sprout-exploitations 1 [
-        set landowner lOwner
-        set shape "house"
-        set listofpatches (list patch-here)
-        set symbolicvalue random(4)
-        set color [color] of owner landowner
-        set totalproduction 0
-        ifelse not-enough-villa? [do-villa][do-farm] 
-        repeat minsizeofland [ enlarge2 listofpatches ]
-        set notRentable 0
-        set totalaccesibility 0
-         ask patch x y [set pcolor black]
-        ask owner lOwner [
-            set listExploitation lput myself listExploitation
-            ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
-        ]
-          show length listofpatches
-      ]
-      ][]
-  ]
-  ]
+to test
+  ;show [who] of owners with [rank = "aristocrat"]
+  let _l []
+  ask exploitations with [typeOfExploitation = "villa"] [ 
+    let _r [rank] of owner landowner
+    if distance one-of (towns with [isCapital]) < 27  and _r = "aristocrat"[set _l lput landowner _l]] 
+ ; ask towns with [isCapital] [ask patches in-radius 27 [set pcolor red]]
+  show length _l
+  ask owners[ if count (turtle-set listExploitation) with [typeOfExploitation = "villa"] > maxNumberExploit [show who]]
 end
 
 

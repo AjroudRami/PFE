@@ -87,18 +87,20 @@ end
 
 
 to stuffBeforeOwnersCalcul
-
+  let _neareast 0
   ask patches[
     set production agrologicalPower
     impactAgriculturalStructure ; include-uils
     impactYearsExploitation ; include-uils
     ;; T1 : 15
-    if exploited [set accessibility distance one-of towns]
+
+    if exploited [ set _neareast min-one-of towns [distance myself] set accessibility distance _neareast]
   ]
 
   ask exploitations[
     ;;T1 : 14
     set totalproduction (sum [production] of  (patch-set listofpatches))
+    if typeOfExploitation = "villa" [bonus-villa]
     ;; T1 : 16 != 17 -> On calcule la distance par rapport à la CAPITALE et non plus aux villes
     set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
   ]
@@ -139,8 +141,13 @@ end
 ;;puis on tue l'exploitation courante (non rentable)
 to abandon
   let _nameOwner [landowner] of self
+  let _r [rank] of owner landowner
+  let _t typeOfExploitation
+  let _cap one-of towns with [isCapital]
 
-   creation
+  ifelse _r = "aristocrat" and _t ="villa" and distance _cap < 27  [ create-near-capital][ creation]
+  ;ifelse distance (one-of towns with [isCapital]) < 27  and _r = "aristocrat" [creation][ask owner _nameOwner [create-exploitation _nameOwner]]
+  ;creation
 
   ask owner _nameOwner [
     set numberOfexploitation numberofExploitation - 1
@@ -212,11 +219,10 @@ to chooseRentableExploitationAndExpand
 
 
   ;;Necessary to enlarge terrain
-  let _watchTerrain 2
+
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
-  if(count _probablygood > _watchTerrain) [
-    let _terrain max-n-of _watchTerrain _probablygood [production]
-    let _startcluster one-of _terrain
+  if(count _probablygood > 0) [
+    let _startcluster max-n-of 1 _probablygood [production]
 
     ;foreach terrain [set exploited true]
     ask _startcluster [
@@ -242,15 +248,14 @@ to chooseRentableExploitationAndExpand
         ask owner _nameOwner [
           set listExploitation lput myself listExploitation
           set numberOfExploitation numberOfExploitation + 1
-        ]
-      ]
-    ]
+        ]; fin ask owner
+      ] ;fin sprout
+    ] ; fin startcluster
     let _numb [numberOfExploitation] of owner _nameOwner
     let _maxn [maxNumberExploit] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
     ;goodprofit est le profit que rapporte cette nouvelle exploitation
     if (_goodprofit > _profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
-
-  ]
+  ]; fin if
 end
 
 
@@ -327,6 +332,7 @@ end
 ;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
 to checkProfitDecreased ; Baisse de profit
   let _profit 0
+
   foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
@@ -339,6 +345,7 @@ end
 
 to checkProfitEquivalent ; Profit Equivalent
   let _profit 0
+
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
@@ -351,11 +358,12 @@ end
 
 to checkProfitIncreased ;Augmentation du profit
   let _profit 0
+
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
       ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve]
-      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][creation]]
+      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches show "YOUHOU"][creation show "NULL"]]
     ]
   ]
 end
@@ -407,10 +415,10 @@ NIL
 BUTTON
 76
 191
-139
+347
 224
 NIL
-go
+go\nshow \"------------\"\ntest\nshow \"------------\"
 NIL
 1
 T
@@ -476,10 +484,10 @@ PENS
 BUTTON
 75
 135
-138
+146
 168
 NIL
-go
+go\ntest
 T
 1
 T
@@ -817,7 +825,7 @@ BUTTON
 92
 156
 EZ
-clear\nload-climatique\nsetup
+clear\nload-climatique\nsetup\ntest
 NIL
 1
 T
