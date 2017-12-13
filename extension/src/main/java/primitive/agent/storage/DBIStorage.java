@@ -1,6 +1,6 @@
 package primitive.agent.storage;
 
-import kobdig.agent.Agent;
+import businessData.DBIAgent;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Command;
 import org.nlogo.api.Context;
@@ -9,11 +9,10 @@ import org.nlogo.core.SyntaxJ;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class DBIStorage implements Command {
 
-    private Map<String, Agent> agents;
+    private Map<String, DBIAgent> agents;
 
     @Override
     public void perform(Argument[] args, Context context) {
@@ -31,7 +30,7 @@ public class DBIStorage implements Command {
      * @param name
      * @param agent
      */
-    public void updateAgent(String name, Agent agent) {
+    public void updateAgent(String name, DBIAgent agent) {
         this.agents.replace(name, agent);
     }
 
@@ -41,26 +40,22 @@ public class DBIStorage implements Command {
      * @param name
      * @param agent
      */
-    public void setAgent(String name, Agent agent) {
+    public void addAgent(String name, DBIAgent agent) {
         this.agents.putIfAbsent(name, agent);
     }
 
     /**
-     * Return an Optional object corresponding to the given name.
-     * If the agent name is not registred, it returns Optional.empty()
+     * Return a DBIAgent if the name correspond to an element of the storage, null otherwise
      *
      * @param name
      * @return
      */
-    public Optional<Agent> getAgent(String name) {
-        Optional<Agent> opt;
-        Agent agent = this.agents.get(name);
-        if (this.agents.get(name) != null) {
-            opt = Optional.of(agent);
+    public DBIAgent getAgent(String name) {
+        if (this.agents.containsKey(name)) {
+            return this.agents.get(name);
         } else {
-            opt = Optional.empty();
+            return null;
         }
-        return opt;
     }
 
     /**

@@ -1,5 +1,6 @@
 package primitive.agent.behavior;
 
+import businessData.DBIAgent;
 import kobdig.agent.Agent;
 import kobdig.agent.Fact;
 import kobdig.logic.TruthDegree;
@@ -25,7 +26,7 @@ public class UpdateBelief implements Command {
      */
     @Override
     public void perform(Argument[] args, Context context) throws ExtensionException {
-        Agent dbi = (Agent) args[0].get();
+        DBIAgent dbi = (DBIAgent) args[0].get();
         Fact fact = (Fact) args[1].get();
         TruthDegree truthDegree = new TruthDegree(args[2].getDoubleValue());
         dbi.updateBeliefs(fact, truthDegree);

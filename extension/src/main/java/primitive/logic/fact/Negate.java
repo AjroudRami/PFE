@@ -1,6 +1,5 @@
-package primitive.agent.behavior;
+package primitive.logic.fact;
 
-import kobdig.agent.Agent;
 import kobdig.agent.Fact;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
@@ -9,11 +8,12 @@ import org.nlogo.api.Reporter;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
-public class GetFactBeliefFactor implements Reporter {
+/**
+ * This class implements a primitive used to negate a Fact.
+ */
+public class Negate implements Reporter {
 
     /**
-     * This method takes an agent and a fact and returns the belief factor of the agent.
-     *
      * @param args
      * @param context
      * @return
@@ -21,13 +21,12 @@ public class GetFactBeliefFactor implements Reporter {
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        Agent dbi = (Agent) args[0].get();
-        Fact fact = (Fact) args[1].get();
-        return dbi.believes(fact).doubleValue();
+        Fact fact = (Fact) args[0].get();
+        return fact.negated();
     }
 
     @Override
     public Syntax getSyntax() {
-        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType(), Syntax.WildcardType()}, Syntax.NumberType());
+        return SyntaxJ.reporterSyntax(new int[]{Syntax.WildcardType()}, Syntax.WildcardType());
     }
 }

@@ -1,6 +1,6 @@
 package primitive.agent.io;
 
-import kobdig.agent.Agent;
+import businessData.DBIAgent;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
 import org.nlogo.api.ExtensionException;
@@ -29,17 +29,17 @@ public class ImportDBIBehavior implements Reporter {
      *
      * @param args
      * @param context
-     * @return an Agent. It returns null if an IOException occurs.
+     * @return a DBIAgent. It returns null if an IOException occurs.
      * @throws ExtensionException if an IOException occurs
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         String filename = args[0].getString();
-        Agent agent;
+        DBIAgent agent;
         try {
             File file = new File(filename);
             InputStream inputStream = new FileInputStream(file);
-            agent = new Agent(inputStream);
+            agent = new DBIAgent(inputStream);
         } catch (IOException e) {
             throw new ExtensionException(e.getMessage());
         }

@@ -9,21 +9,23 @@
 
 package kobdig;
 
+import kobdig.agent.Agent;
+import kobdig.agent.Fact;
+import kobdig.gui.MainFrame;
+import kobdig.logic.PropositionalAtom;
+import kobdig.logic.PropositionalFormula;
+import kobdig.logic.TruthDegree;
+import kobdig.market.Market;
+import kobdig.market.Simulation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Iterator;
 
-import kobdig.agent.Agent;
-import kobdig.agent.Fact;
-import kobdig.gui.MainFrame;
-import kobdig.logic.*;
-import kobdig.market.Market;
-import kobdig.market.Simulation;
-
 /**
  * Main class for the KOBDIG application.
- * KOBDIG stands for Knowledge, Obligations, Beliefs, Desires, Intentions, Goals. 
+ * KOBDIG stands for Knowledge, Obligations, Beliefs, GetDesires, Intentions, Goals.
  *
  * @author Andrea G. B. Tettamanzi
  */

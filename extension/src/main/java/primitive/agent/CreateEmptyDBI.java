@@ -1,6 +1,6 @@
 package primitive.agent;
 
-import kobdig.agent.Agent;
+import businessData.DBIAgent;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
 import org.nlogo.api.Reporter;
@@ -15,7 +15,7 @@ import org.nlogo.core.SyntaxJ;
 public class CreateEmptyDBI implements Reporter {
     @Override
     public Object report(Argument[] args, Context context) {
-        Agent agent = new Agent();
+        DBIAgent agent = new DBIAgent();
         return agent;
     }
 

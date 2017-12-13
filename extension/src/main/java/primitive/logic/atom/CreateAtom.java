@@ -1,4 +1,4 @@
-package primitive.logic;
+package primitive.logic.atom;
 
 import kobdig.logic.Atom;
 import org.nlogo.api.Argument;

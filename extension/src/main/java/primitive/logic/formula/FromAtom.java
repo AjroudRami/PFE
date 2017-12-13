@@ -1,4 +1,4 @@
-package primitive.logic;
+package primitive.logic.formula;
 
 import kobdig.logic.Atom;
 import kobdig.logic.Formula;
@@ -12,7 +12,7 @@ import org.nlogo.core.SyntaxJ;
 /**
  * This class implements a reporter that create a Formula object
  */
-public class CreateFormulaFromAtom implements Reporter {
+public class FromAtom implements Reporter {
 
     /**
      * This method creates a Formula object from an Atom and returns a reference to the created Formula.

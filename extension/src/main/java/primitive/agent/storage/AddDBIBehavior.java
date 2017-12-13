@@ -1,6 +1,6 @@
 package primitive.agent.storage;
 
-import kobdig.agent.Agent;
+import businessData.DBIAgent;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Command;
 import org.nlogo.api.Context;
@@ -28,9 +28,9 @@ public class AddDBIBehavior implements Command {
      */
     @Override
     public void perform(Argument[] args, Context context) throws ExtensionException {
-        Agent dbi = (Agent) args[0].get();
+        DBIAgent dbi = (DBIAgent) args[0].get();
         String name = args[1].toString();
-        this.storage.setAgent(name, dbi);
+        this.storage.addAgent(name, dbi);
     }
 
     @Override

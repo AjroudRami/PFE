@@ -1,6 +1,6 @@
 package primitive.agent.behavior;
 
-import kobdig.agent.Agent;
+import businessData.DBIAgent;
 import kobdig.agent.Fact;
 import kobdig.agent.FactSet;
 import org.nlogo.api.*;
@@ -24,7 +24,7 @@ public class GetGoals implements Reporter {
      */
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
-        Agent dbi = (Agent) args[0].get();
+        DBIAgent dbi = (DBIAgent) args[0].get();
         FactSet facts = dbi.goals();
         Iterator<Fact> iterator = facts.factIterator();
         LogoListBuilder builder = new LogoListBuilder();

@@ -1,4 +1,4 @@
-package primitive.logic;
+package primitive.logic.formula;
 
 import kobdig.agent.Fact;
 import org.nlogo.api.Argument;
@@ -9,11 +9,13 @@ import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
 /**
- * This class implements a primitive used to negate a Fact.
+ * This class implements a reporter that help extract a Formula from a Fact
  */
-public class NegateFact implements Reporter {
+public class FromFact implements Reporter {
 
     /**
+     * It takes a Fact as argument and returns a Formula
+     *
      * @param args
      * @param context
      * @return
@@ -22,7 +24,7 @@ public class NegateFact implements Reporter {
     @Override
     public Object report(Argument[] args, Context context) throws ExtensionException {
         Fact fact = (Fact) args[0].get();
-        return fact.negated();
+        return fact.formula();
     }
 
     @Override

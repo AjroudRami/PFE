@@ -1,4 +1,4 @@
-package primitive.logic;
+package primitive.logic.formula;
 
 import kobdig.logic.Formula;
 import kobdig.logic.Operator;
