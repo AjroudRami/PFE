@@ -155,7 +155,8 @@ to abandon
    ]
 ;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
-    set pcolor (15 + (landscapeType * 20)) ;donne la couleur de base des patchs
+    ifelse show-color? [ set pcolor (15 + (landscapeType * 20))] ;donne la couleur de base des patchs
+    [set pcolor black]
     set exploited false
     set cluster nobody ]
 
@@ -183,14 +184,18 @@ end
 
 ;Agrandit un terrain d'une parcelle contigu au terrain de l'exploitation appellante
 to enlarge2 [listpatches]
-  let watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
-  if ( count watchterrain) > 0 [
-    let p  max-n-of 1 watchterrain [production]
+  let _watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
+  let _better _watchterrain with [haveTools]
+  let _parcelle patch 0 0
+  if ( count _watchterrain) > 0 [
+    ifelse count _better > 0 [set _parcelle max-n-of 1 _better [production]] ;prefere prendre un terrain avec des structures agricoles
+    [set _parcelle max-n-of 1 _watchterrain [production]] ; s'il n'en trouve pas alors en prend un sans
+
     ask self[
-      set listofpatches sentence listpatches (sort p)
+      set listofpatches sentence listpatches (sort _parcelle)
     ]
 
-    ask p [
+    ask _parcelle [
       set exploited true
       set pcolor [color] of myself
     ]
