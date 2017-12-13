@@ -53,7 +53,7 @@ to setupLandOwners
   create-owners (5)
   ask owners [
     set color random(100)
-    set rank item 2 ["farmers" "rich" "aristocrat"]
+    set rank item random(3) ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
     set listExploitation []
   ]
@@ -84,8 +84,12 @@ to setupExploitationPerOwners
 ;Associe une valeur symbolique à chaque exploitations
 to setupSymbolic
   ask exploitations[
-    set symbolicvalue random(4)
-    ;;if near capital set symbolivalue symbolicvalue +1
+    let _owner owner landowner
+    let _rank [rank] of _owner
+    ifelse  _rank = "farmer" [ set symbolicvalue 3 ]
+    [set symbolicvalue random(4)]
+    
+    if distance one-of towns with [isCapital] < 27 [set symbolicvalue symbolicvalue + 1]
   ]
 end
 

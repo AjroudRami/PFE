@@ -90,8 +90,8 @@ to stuffBeforeOwnersCalcul
   let _neareast 0
   ask patches[
     set production agrologicalPower
-    impactAgriculturalStructure ; include-uils
-    impactYearsExploitation ; include-uils
+    impactAgriculturalStructure ; include-utils
+    impactYearsExploitation ; include-utils
     ;; T1 : 15
 
     if exploited [ set _neareast min-one-of towns [distance myself] set accessibility distance _neareast]
@@ -217,12 +217,15 @@ to chooseRentableExploitationAndExpand
   let _goodprofit 0 ;
   let _profit 0 ; valeur servant à definir si le profit que nous rapporte une nouvelle exploitation est suffisant pour en creer de nouveau une autre.
 
-
   ;;Necessary to enlarge terrain
 
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
+  let _better _probablygood with [haveTools]
+  let _startcluster patch 0 0 ;initialisation
   if(count _probablygood > 0) [
-    let _startcluster max-n-of 1 _probablygood [production]
+    ifelse count _better > 0 [set _startcluster max-n-of 1 _better [production]] ;prefere prendre un terrain avec des structures agricoles
+    [set _startcluster max-n-of 1 _probablygood [production]] ; s'il n'en trouve pas alors en prend un sans
+
 
     ;foreach terrain [set exploited true]
     ask _startcluster [
@@ -487,7 +490,7 @@ BUTTON
 146
 168
 NIL
-go\ntest
+go
 T
 1
 T
