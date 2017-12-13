@@ -116,3 +116,37 @@ to do-villa
   set minsizeofland 11
   set maxsizeofland 100
 end
+
+to bonus-villa
+  let _main-oeuvre 100
+  set totalproduction totalproduction + _main-oeuvre
+end
+
+to create-near-capital
+  let _capital one-of towns with [isCapital]
+  let _near 27
+  let _emplacementDispo patches with [distance _capital < _near and exploited = false]
+  let _emplacement one-of _emplacementDispo
+  let _own [landowner] of self
+  
+  ask _emplacement [
+    set exploited true
+    set pcolor black
+    sprout-exploitations 1 [
+      set landowner _own
+      set shape "house"
+      set listofpatches (list patch-here)
+      set symbolicvalue random(4)
+      set color [color] of owner _own
+      set totalproduction 0
+     do-villa 
+      repeat minsizeofland [ enlarge2 listofpatches ]
+      set notRentable 0
+      set totalaccesibility 0
+      ask owner _own [
+          set listExploitation lput myself listExploitation
+          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+      ] ;; fin ask owner
+    ] ;; fin sprout
+  ] ;; fin ask emplacement
+end
