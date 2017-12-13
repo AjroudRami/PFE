@@ -20,6 +20,7 @@ import primitive.logic.formula.CreateFormula;
 import primitive.logic.formula.FromAtom;
 import primitive.logic.formula.FromFact;
 import primitive.logic.operator.CreateOperator;
+import primitive.logic.operator.ToExtensionOp;
 import primitive.logic.propositionalAtom.CreatePropositionalAtom;
 import primitive.logic.propositionalFormula.CreatePropositionalFormula;
 import primitive.logic.truthdegree.DoubleValue;
@@ -61,6 +62,7 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.FACTSET_MEMBERSHIP, new Membership());
         primManager.addPrimitive(Primitives.FACT_GET_FORMULA, new GetFormula());
         primManager.addPrimitive(Primitives.TRUTHDEGREE_DOUBLE_VALUE, new DoubleValue());
+        primManager.addPrimitive(Primitives.TO_EXTENSION_OP, new ToExtensionOp());
 
     }
 

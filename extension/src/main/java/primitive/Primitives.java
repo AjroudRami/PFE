@@ -35,6 +35,7 @@ public class Primitives {
      */
     public static final String CREATE_ATOM = "Atom";
 
+
     /**
      * Formula primitives
      */
@@ -51,7 +52,11 @@ public class Primitives {
      */
     //Name
     public static final String Operator = "Operator";
+    //Constructor
     public static final String CREATE_OPERATOR = Operator;
+    //Methods
+    public static final String TO_EXTENSION_OP = Operator + SEP + "toExtensionType";
+
 
     /**
      * PropositionalFormula primitives
@@ -61,15 +66,18 @@ public class Primitives {
     public static final String CREATE_PROPOSITIONAL_FORMULA = PropositionalFormula;
     public static final String PROPOSITIONAL_FORMULA_FROM_ATOM = PropositionalFormula + SEP + "fromAtom";
 
+
     /**
      * PropositionalAtom primitives
      */
     public static final String CREATE_PROPOSITIONAL_ATOM = "PropositionalAtom";
 
+
     /**
      * Proposition primitives
      */
     public static final String CREATE_PROPOSITION = "Proposition";
+
 
     /**
      * Fact primitives
@@ -81,6 +89,7 @@ public class Primitives {
     public static final String NEGATE_FACT = Fact + SEP + "negate";
     public static final String FACT_GET_FORMULA = Fact + SEP + "getFormula";
 
+
     /**
      * FactSet primitives
      */
@@ -88,6 +97,7 @@ public class Primitives {
     public static final String Factset = "Factset";
     //Methods
     public static final String FACTSET_MEMBERSHIP = Factset + SEP + "membership";
+
 
     /**
      * TruthDegree primitives
