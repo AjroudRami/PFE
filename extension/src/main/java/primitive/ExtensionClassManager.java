@@ -14,9 +14,7 @@ import primitive.logic.fact.FromFormula;
 import primitive.logic.fact.GetFormula;
 import primitive.logic.fact.Negate;
 import primitive.logic.factSet.Membership;
-import primitive.logic.formula.CreateFormula;
-import primitive.logic.formula.FromAtom;
-import primitive.logic.formula.FromFact;
+import primitive.logic.formula.*;
 import primitive.logic.operator.CreateOperator;
 import primitive.logic.operator.ToExtensionOp;
 import primitive.logic.propositionalAtom.CreatePropositionalAtom;
@@ -62,7 +60,8 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.TRUTHDEGREE_DOUBLE_VALUE, new DoubleValue());
         primManager.addPrimitive(Primitives.TO_EXTENSION_OP, new ToExtensionOp());
         primManager.addPrimitive(Primitives.GET_ATOM_NAME, new GetName());
-
+        primManager.addPrimitive(Primitives.FORMULA_IS_ATOMIC, new IsAtomic());
+        primManager.addPrimitive(Primitives.GET_FORMULA_ATOMS, new GetAtoms());
     }
 
     /**

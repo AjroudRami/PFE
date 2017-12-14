@@ -49,6 +49,8 @@ public class Primitives {
     public static final String CREATE_FORMULA = Formula;
     public static final String CREATE_FORMULA_FROM_ATOM = Formula + SEP + "fromAtom";
     public static final String GET_FORMULA_FROM_FACT = Formula + SEP + "fromFact";
+    public static final String GET_FORMULA_ATOMS = Formula + SEP + "getAtoms";
+    public static final String FORMULA_IS_ATOMIC = Formula + SEP + "isAtomic";
 
 
     /**
