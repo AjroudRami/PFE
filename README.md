@@ -49,6 +49,7 @@ This extension adds DBI Agents to NetLogo.
 
 ### Atom primitives
 [`dbi:Atom`](#dbiatom)
+[`dbi:Atom-getName`](#dbiatom-getname)
 
 ### Formula primitives
 [`dbi:Formula`](#dbiformula)
@@ -187,6 +188,18 @@ dbi:Atom "name"
 **argument**: the Atom name as a String
 
 **returns:** an Atom
+
+### `dbi:Atom-getName`
+**Description:** This primitive returns the given Atom's name. It can be usefull for handling the decision taken by the DBIAgent in the Netlogo code as the name can stand for a purpose (ex: "buy", "sell", ...)
+
+**argument**: the Atom
+
+**returns:** a String, the Atom's name
+
+**Code example**
+```NetLogo
+dbi:Atom-getName Atom
+```
 
 ### `dbi:Formula`
 ```NetLogo
