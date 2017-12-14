@@ -30,10 +30,58 @@ This extension adds DBI Agents to NetLogo.
 
 ## Primitives
 
-### Storage Primitives
+### Storage primitives
 [`dbi:DBIStorage-init`](#dbiDBIStorageinit)
+[`dbi:DBIStorage-add`](#dbiDBIStorageadd)
+[`dbi:DBIStorage-remove`](#dbiDBIStorageremove)
+[`dbi:DBIStorage-update`](#dbiDBIStorageupdate)
+
 ### DBIAgent primitives
 [`dbi:DBIAgent`](#dbiDBIAgent)
+[`dbi:DBIAgent-import`](#dbiDBIAgentimport)
+[`dbi:DBIAgent-updateBelief`](#dbiDBIAgentupdateBelief)
+[`dbi:DBIAgent-export`](#dbiDBIAgentexport)
+[`dbi:DBIAgent-goalsAsLogoList`](#dbiDBIAgentgoalsAsLogoList)
+[`dbi:DBIAgent-desires`](#dbiDBIAgentdesires)
+[`dbi:DBIAgent-believes`](#dbiDBIAgentbelieves)
+[`dbi:DBIAgent-goalsAsFactSet`](#dbiDBIAgentgoalsAsFactSet)
+
+### Atom primitives
+[`dbi:Atom`](#dbiAtom)
+
+### Formula primitives
+[`dbi:Formula`](#dbiFormula)
+[`dbi:Formula-fromAtom`](#dbiFormulafromAtom)
+[`dbi:Formula-fromFact`](#dbiFormulafromFact)
+
+### Operator primitives
+[`dbi:Operator`](#dbiOperator)
+[`dbi:Operator-toExtensionType`](#dbiOperatortoExtensionType)
+
+### PropositionalFormula primitives
+[`dbi:PropositionalFormula`](#dbiPropositionalFormula)
+[`dbi:PropositionalFormula-fromAtom`](#dbiPropositionalFormulafromAtom)
+
+### PropositionalAtom primitives
+[`dbi:PropositionalAtom`](#dbiPropositionalAtom)
+
+### Proposition primitives
+[`dbi:Proposition`](#dbiProposition)
+
+### Fact primitives
+[`dbi:Fact`](#dbiFact)
+[`dbi:Fact-fromFormula`](#dbiFactfromFormula)
+[`dbi:Fact-negate`](#dbiFactnegate)
+[`dbi:Fact-getFormula`](#dbiFactgetFormula)
+
+### FactSet primitives
+[`dbi:Factset-membership`](#dbiFactsetmembership)
+
+### TruthDegree primitives
+[`dbi:TruthDegree-doubleValue`](#dbiTruthDegreedoubleValue)
+
+### Utils primitives
+[`dbi:Utils-removeDuplicates`](#dbiUtilsremoveDuplicates)
 
 ### `dbi:DBIStorage-init`
 
@@ -41,12 +89,26 @@ This extension adds DBI Agents to NetLogo.
 dbi:DBIStorage-init
 ```
 
+### `dbi:DBIStorage-add`
+### `dbi:DBIStorage-remove`
+### `dbi:DBIStorage-update`
 ### `dbi:DBIAgent`
 
 ```NetLogo
-dbi:DBIAgent "filename-as-a-string"
+dbi:DBIAgent
 ```
 
+### `dbi:DBIAgent-import`
+### `dbi:DBIAgent-updateBelief`
+### `dbi:DBIAgent-export`
+### `dbi:DBIAgent-goalsAsLogoList`
+### `dbi:DBIAgent-desires`
+### `dbi:DBIAgent-believes`
+### `dbi:DBIAgent-goalsAsFactSet`
+
+### `dbi:Atom`
+
+[``](#)
 
 ## Terms of Use
 
