@@ -1,0 +1,96 @@
+extensions [ gis ]
+
+globals [
+ ville-frejus-dataset 
+ agglo-frejus-dataset
+]
+
+;fonction qui importe les fichiers raster / shapefile
+to import-shapefile
+  gis:load-coordinate-system(word "shapefile/raster-Agglo-Frejus/Agglos_Frejus_Lbt93.prj")
+  
+  set agglo-frejus-dataset gis:load-dataset "./shapefile/raster-Agglo-Frejus/Agglos_Frejus_Lbt93.shp"
+  set ville-frejus-dataset gis:load-dataset "./shapefile/raster-VilleFrejus/VilleFrejus_Lbt93.shp"
+  
+  gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of ville-frejus-dataset)
+    (gis:envelope-of agglo-frejus-dataset)
+    )
+end
+
+;fonction qui colorie les patches qui interjecte le dessin défini par le dataset
+to display-ville-frejus
+  ask patches gis:intersecting ville-frejus-dataset [
+    set pcolor red
+  ]
+end
+
+;fonction qui colorie les patches qui interjecte le dessin défini par le dataset
+to display-agglo-frejus
+  ask patches gis:intersecting agglo-frejus-dataset [
+    set pcolor orange
+  ]
+end
+
+;Sert à être appelé en dehors du module
+;Les fonctions sont appelé dans le bon ordre
+to doGis
+  import-shapefile
+  display-ville-frejus
+  display-agglo-frejus
+  ask patches [ set exploited  false]
+  setup-capital
+  setup-ville
+end
+
+;Fonction qui place une capitale et l'initialise
+to setup-capital ; color = red
+  ask patches with [pcolor = red] [
+    sprout-towns 1 [
+    set color black
+    set shape "house"
+    set location patch-here
+    ;set taille 7 ; sqr(50) ~~ 7.07 
+    set isCapital true 
+    ;set listofpatch []
+    set listofpatch location
+      ;Pour faire un carré d'environ 50ha
+    repeat 3 [
+        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [exploited = false]
+        ask x[
+          set pcolor white
+          set exploited true
+        ]
+        set listofpatch (patch-set listofpatch  x)
+        
+    ]
+    set listofpatch (sort listofpatch)
+    set taille length listofpatch
+    ]
+  ]
+end
+
+;Fonction qui place et initialise les villes
+to setup-ville ; color = orange
+  ask n-of 2 patches with [pcolor = orange] [ ;;n-of2 on choisit 2 ville parmi les points represantant les villes
+    sprout-towns 1 [
+    set color black
+    set shape "flag"
+    set location patch-here
+    ;set taille 7 ; sqr(50) ~~ 7.07 
+    set isCapital false 
+    set listofpatch location
+      ;Pour faire un carré d'environ 50ha
+    repeat 1 [
+        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [exploited = false]
+        ask x[
+          set pcolor white
+          set exploited true
+        ]
+        set listofpatch (patch-set listofpatch  x)
+        
+    ]
+    set listofpatch (sort listofpatch)
+    set taille length listofpatch
+    ]
+  ]
+end

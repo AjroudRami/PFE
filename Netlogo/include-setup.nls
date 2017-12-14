@@ -78,7 +78,6 @@ to setupExploitationPerOwners
 
   repeat maxNumberExploit [create-exploitation who]
   ]
-
  end
 
 ;Associe une valeur symbolique à chaque exploitations
@@ -126,13 +125,16 @@ end
 to create-exploitation [lOwner]
   
   let _capital one-of towns with [isCapital]
-  let _near 27
+  let _near 27 ;rayon d'influence (en patch) de la capitale
   let _emplacementDispo patches with [distance _capital < _near and exploited = false]
   let _emplacement one-of _emplacementDispo
   let _anywhere one-of patches with [exploited = false]
   let _r [rank] of owner lOwner
   
-  ifelse _r = "aristocrat" [ let _exploit count (turtle-set listExploitation) with [distance one-of (towns with [isCapital]) < 27]
+  ;Pour les aristocrats qui n'ont pas d'exploitation dans le rayon d'influence de la capitale
+  ;Vont donc choisir un emplacement proce de la capital
+  ifelse _r = "aristocrat" [ 
+    let _exploit count (turtle-set listExploitation) with [distance one-of (towns with [isCapital]) < 27]
     if _exploit != 0 [set _emplacement _anywhere]];true 
  [set _emplacement _anywhere] ;false
   ask _emplacement [
@@ -157,6 +159,7 @@ to create-exploitation [lOwner]
   ] ;; fin ask emplacement
 end
 
+;Fonction faisant remontée des infos de debug
 to test
   ;show [who] of owners with [rank = "aristocrat"]
   let _l []
