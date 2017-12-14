@@ -7,10 +7,7 @@ import primitive.agent.CreateEmptyDBI;
 import primitive.agent.behavior.*;
 import primitive.agent.io.ExportDBIBehavior;
 import primitive.agent.io.ImportDBIBehavior;
-import primitive.agent.storage.AddDBIBehavior;
-import primitive.agent.storage.DBIStorage;
-import primitive.agent.storage.DeleteBehavior;
-import primitive.agent.storage.UpdateDBIBehavior;
+import primitive.agent.storage.*;
 import primitive.logic.atom.CreateAtom;
 import primitive.logic.fact.FromFormula;
 import primitive.logic.fact.GetFormula;
@@ -78,5 +75,6 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.DELETE_BEHAVIOR, new DeleteBehavior(storage));
         primManager.addPrimitive(Primitives.ADD_BEHAVIOR, new AddDBIBehavior(storage));
         primManager.addPrimitive(Primitives.UPDATE_BEHAVIOR, new UpdateDBIBehavior(storage));
+        primManager.addPrimitive(Primitives.GET_DBI_BEHAVIOR, new GetDBIBehavior(storage));
     }
 }

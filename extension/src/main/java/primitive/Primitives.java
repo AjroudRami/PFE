@@ -11,6 +11,7 @@ public class Primitives {
     public static final String ADD_BEHAVIOR = DBIStorage + SEP + "add";
     public static final String DELETE_BEHAVIOR = DBIStorage + SEP + "remove";
     public static final String UPDATE_BEHAVIOR = DBIStorage + SEP + "update";
+    public static final String GET_DBI_BEHAVIOR = DBIStorage + SEP + "get";
 
 
     /**
