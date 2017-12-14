@@ -83,32 +83,36 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Starting T1 functions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TRY DBI AGENTS
 
 
+
+;Phase de calcul nécessaire à chaque étape
 to stuffBeforeOwnersCalcul
   let _neareast 0
   ask patches[
-    set production agrologicalPower
-    impactAgriculturalStructure ; include-uils
-    impactYearsExploitation ; include-uils
+    set production agrologicalPower ;chaque piece of land set sa production
+    impactAgriculturalStructure ; include-utils (augmente la production si il existe des structures agricoles sur une piece of land
+    impactYearsExploitation ; include-utils (Diminue la production si la piece of land est exploité depuis longtemps
     ;; T1 : 15
 
+    ;set accessibilité d'une piece of land la distance qui la sépare de la ville la plus proche
     if exploited [ set _neareast min-one-of towns [distance myself] set accessibility distance _neareast]
   ]
 
+  ;Pour chaque exploitations
   ask exploitations[
     ;;T1 : 14
-    set totalproduction (sum [production] of  (patch-set listofpatches))
-    if typeOfExploitation = "villa" [bonus-villa]
+    set totalproduction (sum [production] of  (patch-set listofpatches)) ;Sa production = somme des production de ses pice of lan
+    if typeOfExploitation = "villa" [bonus-villa] ;si l'exploitation est une villa on applique son bonus à son total de production
     ;; T1 : 16 != 17 -> On calcule la distance par rapport à la CAPITALE et non plus aux villes
-    set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
+    set totalaccesibility (mean [accessibility] of (patch-set listofpatches));
   ]
 
+  ;Pour chaque owner
  ask owners [
-    set oldmoney money
+    set oldmoney money;On set son argent à t-1
     set ecopower (oldmoney - money)
-    set money (sum [(2 * totalproduction) - totalaccesibility] of turtle-set listExploitation)
+    set money (sum [(2 * totalproduction) - totalaccesibility] of turtle-set listExploitation); set profit à t now.
   ]
 
   let _freepol patches with [exploited = false]
@@ -128,6 +132,7 @@ to improve
   addStructure ; include-utils
 end
 
+;crée une exploitation si on peut encore en créer
 to creation
   let tmp [numberOfExploitation] of myself
   let maxx [maxNumberExploit] of myself
@@ -145,17 +150,19 @@ to abandon
   let _t typeOfExploitation
   let _cap one-of towns with [isCapital]
 
+  ;Si un aristocrat abandonne sa villa qui est sous l'influence de la capitale il DOIT en recréer une proche de la capitale
+  ;sinon on créer simplement une exploitation supplémentaires
   ifelse _r = "aristocrat" and _t ="villa" and distance _cap < 27  [ create-near-capital][ creation]
-  ;ifelse distance (one-of towns with [isCapital]) < 27  and _r = "aristocrat" [creation][ask owner _nameOwner [create-exploitation _nameOwner]]
-  ;creation
 
   ask owner _nameOwner [
     set numberOfexploitation numberofExploitation - 1
     set listExploitation (remove myself listExploitation)
    ]
+
 ;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
-    set pcolor (15 + (landscapeType * 20)) ;donne la couleur de base des patchs
+    ifelse show-color? [ set pcolor (15 + (landscapeType * 20))] ;donne la couleur de base des patchs
+    [set pcolor black]
     set exploited false
     set cluster nobody ]
 
@@ -164,52 +171,27 @@ to abandon
   die ;; tue l'exploitation non rentable
 end
 
-;Agrandit un terrain (en croix)
-to enlarge
-  let watchTerrain 2 ;;Nombre de terrains max que l'exloitation va évaluer comme étant rentable ou non
-  let probablygood  (patch-set [neighbors4] of (patch-set listofpatches) ) with [exploited = false] ;Terrains proches et non exploité
-  if (count probablygood >= watchTerrain) [
-    let terrain max-n-of watchTerrain probablygood [production]
-    let startcluster one-of terrain
-    ask startcluster [
-      set cluster self
-      set exploited true
-      set pcolor [color] of myself
-      grow-cluster
-      let groupPatches sort (patches with [cluster = startcluster])
-      if groupPatches != 0 [ask myself[set listofpatches sentence listofpatches groupPatches] set enlarged enlarged + 1]]
-  ]
-end
-
 ;Agrandit un terrain d'une parcelle contigu au terrain de l'exploitation appellante
 to enlarge2 [listpatches]
-  let watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
-  if ( count watchterrain) > 0 [
-    let p  max-n-of 1 watchterrain [production]
-    ask self[
-      set listofpatches sentence listpatches (sort p)
-    ]
+  ;tous les patches collés au terrain de l'exploitation
+  let _watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
+  let _better _watchterrain with [haveTools]
+  let _parcelle patch 0 0
+  if ( count _watchterrain) > 0 [
+    ifelse count _better > 0 [set _parcelle max-n-of 1 _better [production]] ;prefere prendre un terrain avec des structures agricoles
+    [set _parcelle max-n-of 1 _watchterrain [production]] ; s'il n'en trouve pas alors en prend un sans
 
-    ask p [
+  ;ajoute la piece of land au terrain de l'exploitation
+  set listofpatches sentence listpatches (sort _parcelle)
+  ask _parcelle [
       set exploited true
       set pcolor [color] of myself
     ]
-  ]
-end
-
-;;Fonction qui fait en sorte que les patchs soient contigus
-;;Propage aux voisins directs une "seed" permettant de grouper les patchs
-;par rapport à la "seed"
-to grow-cluster
-
-  ask neighbors4 with [(cluster = nobody) and (exploited = false)]
-  [ set cluster [cluster] of myself
-    set exploited true
-    set pcolor [pcolor] of myself ;[color] of [landowner] of myself
   ]
 end
 
 ;;Si le profit de la nouvelle exploitation est Haut alors en crée jusqu'au max
+;called by exploitations
 to chooseRentableExploitationAndExpand
 
   ;Necessary to loop
@@ -217,12 +199,15 @@ to chooseRentableExploitationAndExpand
   let _goodprofit 0 ;
   let _profit 0 ; valeur servant à definir si le profit que nous rapporte une nouvelle exploitation est suffisant pour en creer de nouveau une autre.
 
-
   ;;Necessary to enlarge terrain
 
   let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
+  let _better _probablygood with [haveTools]
+  let _startcluster patch 0 0 ;initialisation
   if(count _probablygood > 0) [
-    let _startcluster max-n-of 1 _probablygood [production]
+    ifelse count _better > 0 [set _startcluster max-n-of 1 _better [production]] ;prefere prendre un terrain avec des structures agricoles
+    [set _startcluster max-n-of 1 _probablygood [production]] ; s'il n'en trouve pas alors en prend un sans
+
 
     ;foreach terrain [set exploited true]
     ask _startcluster [
@@ -238,7 +223,11 @@ to chooseRentableExploitationAndExpand
         set notRentable 0
         set color [color] of owner landowner
         set totalaccesibility 0
+
+        ;Si l'owner n'a pas son minimum de villa alors cette nouvelle exploitation en sera une
+        ;sinon ce sera une ferme
         ifelse not-enough-villa? [do-villa][do-farm]
+        ;On regarde si l'exploitation nouvellement crée est High/Low rentable
         ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
         repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
@@ -260,6 +249,7 @@ end
 
 
 ;Appelle les fonctions responsables des choix en fonctions des profits réalisés
+;call by go func
 to calculHigherEqualLowerProfit
   ask owners [
     ifelse rank = "aristocrat" [ cmd1 ]
@@ -269,6 +259,7 @@ to calculHigherEqualLowerProfit
 end
 
 ;Appelle la fonction correspondant à l'état du profit des aristocrats
+;called by owners
 to cmd1 ;aristocrats money = profit (ODD)
   ifelse money < oldmoney [checkProfitDecreased ]
   [ ifelse money > oldmoney [checkProfitIncreased ]
@@ -294,6 +285,7 @@ end
 
 
 ;Choix concernant les exploitations des fermiers
+;called by owners
 to checkProfitDecreasedFarmer ;Baisse de profit
   let _profit 0
   foreach listExploitation [
@@ -306,6 +298,7 @@ to checkProfitDecreasedFarmer ;Baisse de profit
   ]
 end
 
+;called by owners
 to checkProfitEquivalentFarmer ; Profit Equivalent
   let _profit 0
    foreach listExploitation [
@@ -318,6 +311,7 @@ to checkProfitEquivalentFarmer ; Profit Equivalent
   ]
 end
 
+;called by owners
 to checkProfitIncreasedFarmer ;Augmentation Profit
   let _profit 0
 foreach listExploitation [
@@ -330,9 +324,9 @@ end
 
 ;Choix concernant les exploitations des aristocrates et des Big landowners
 ;;Profit ici est la valeur limite entre un "High profit" et un "low profit"
+;called by owners
 to checkProfitDecreased ; Baisse de profit
   let _profit 0
-
   foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
@@ -343,9 +337,9 @@ to checkProfitDecreased ; Baisse de profit
   ]
 end
 
+;called by owners
 to checkProfitEquivalent ; Profit Equivalent
   let _profit 0
-
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
@@ -356,9 +350,9 @@ to checkProfitEquivalent ; Profit Equivalent
   ]
 end
 
+;called by owners
 to checkProfitIncreased ;Augmentation du profit
   let _profit 0
-
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
@@ -413,23 +407,6 @@ NIL
 1
 
 BUTTON
-76
-191
-347
-224
-NIL
-go\nshow \"------------\"\ntest\nshow \"------------\"
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-0
-
-BUTTON
 33
 57
 176
@@ -482,12 +459,12 @@ PENS
 "" 1.0 0 -11085214 true "" "ask owners [\n create-temporary-plot-pen (word who)\n set-plot-pen-color color\n plotxy ticks money\n ]"
 
 BUTTON
-75
-135
-146
-168
+70
+206
+141
+239
 NIL
-go\ntest
+go
 T
 1
 T
@@ -820,11 +797,11 @@ NIL
 1
 
 BUTTON
-29
-123
-92
-156
-EZ
+63
+168
+146
+201
+BeforeGo
 clear\nload-climatique\nsetup\ntest
 NIL
 1
