@@ -34,7 +34,10 @@ public class Primitives {
     /**
      * Atom primitives
      */
-    public static final String CREATE_ATOM = "Atom";
+    //Name
+    public static final String Atom = "Atom";
+    public static final String CREATE_ATOM = Atom;
+    public static final String GET_ATOM_NAME = Atom + SEP + "getName";
 
 
     /**

@@ -1,6 +1,6 @@
 enablePlugins(org.nlogo.build.NetLogoExtension)
 
-netLogoExtName      := "dbi_agents"
+netLogoExtName := "dbi"
 
 netLogoClassManager := "primitive.ExtensionClassManager"
 

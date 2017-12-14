@@ -9,6 +9,7 @@ import primitive.agent.io.ExportDBIBehavior;
 import primitive.agent.io.ImportDBIBehavior;
 import primitive.agent.storage.*;
 import primitive.logic.atom.CreateAtom;
+import primitive.logic.atom.GetName;
 import primitive.logic.fact.FromFormula;
 import primitive.logic.fact.GetFormula;
 import primitive.logic.fact.Negate;
@@ -60,6 +61,7 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.FACT_GET_FORMULA, new GetFormula());
         primManager.addPrimitive(Primitives.TRUTHDEGREE_DOUBLE_VALUE, new DoubleValue());
         primManager.addPrimitive(Primitives.TO_EXTENSION_OP, new ToExtensionOp());
+        primManager.addPrimitive(Primitives.GET_ATOM_NAME, new GetName());
 
     }
 

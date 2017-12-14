@@ -1,8 +1,8 @@
-extensions [dbi_agents]
+extensions [dbi]
 globals [agent]
 
 to setup
-  f
+  import
   formulas
 end
 
@@ -12,29 +12,28 @@ to showAgent
 end
 
 to showAgentGoals
-  show (dbi_agents:DBIAgent-goalsAsLogoList agent)
+  show (dbi:DBIAgent-goalsAsLogoList agent)
 end
 
-to f
-  dbi_agents:DBIStorage-init
-  set agent dbi_agents:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\java\\farmer.apl"
-  show agent
+to import
+  dbi:DBIStorage-init
+  set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\java\\farmer.apl"
 end
 
 to formulas
-  let viable dbi_agents:PropositionalFormula-fromAtom dbi_agents:PropositionalAtom "viable"
-  let fertile dbi_agents:PropositionalFormula-fromAtom dbi_agents:PropositionalAtom "fertile"
-  let accessible dbi_agents:PropositionalFormula-fromAtom dbi_agents:PropositionalAtom "accessible"
+  let viable dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "viable"
+  let fertile dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "fertile"
+  let accessible dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "accessible"
 
-  let notOp dbi_agents:Operator "not"
+  let notOp dbi:Operator "not"
 
-  let notViable dbi_agents:PropositionalFormula notOp viable
-  let notFertile dbi_agents:PropositionalFormula notOp fertile
-  let notAccessible dbi_agents:PropositionalFormula notOp accessible
+  let notViable dbi:PropositionalFormula notOp viable
+  let notFertile dbi:PropositionalFormula notOp fertile
+  let notAccessible dbi:PropositionalFormula notOp accessible
 
-  dbi_agents:DBIAgent-updateBelief agent dbi_agents:Fact-fromFormula viable 0.2
-  dbi_agents:DBIAgent-updateBelief agent dbi_agents:Fact-fromFormula fertile 0.25
-  dbi_agents:DBIAgent-updateBelief agent dbi_agents:Fact-fromFormula accessible 0.2
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula notViable 1
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula fertile 0.25
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula accessible 0.2
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
