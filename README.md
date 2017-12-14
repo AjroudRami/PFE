@@ -31,15 +31,22 @@ This extension adds DBI Agents to NetLogo.
 ## Primitives
 
 ### Storage Primitives
-
+[`dbi:DBIStorage-init`](#dbiDBIStorageinit)
 ### DBIAgent primitives
 [`dbi:DBIAgent`](#dbiDBIAgent)
+
+### `dbi:DBIStorage-init`
+
+```NetLogo
+dbi:DBIStorage-init
+```
 
 ### `dbi:DBIAgent`
 
 ```NetLogo
 dbi:DBIAgent "filename-as-a-string"
 ```
+
 
 ## Terms of Use
 
