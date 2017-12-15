@@ -67,11 +67,7 @@ This extension adds DBI Agents to NetLogo.
 ### PropositionalAtom primitives
 [`dbi:PropositionalAtom`](#dbipropositionalatom)
 
-### Proposition primitives
-[`dbi:Proposition`](#dbiproposition)
-
 ### Fact primitives
-[`dbi:Fact`](#dbifact)
 [`dbi:Fact-fromFormula`](#dbifact-fromformula)
 [`dbi:Fact-negate`](#dbifact-negate)
 [`dbi:Fact-getFormula`](#dbifact-getformula)
@@ -86,221 +82,453 @@ This extension adds DBI Agents to NetLogo.
 [`dbi:Utils-removeDuplicates`](#dbiutils-removeduplicates)
 
 ### `dbi:DBIStorage-init`
-Initialize the DBIStorage. Must be called before any other DBIStorage primitive.
-#### Example code
+  **Description:**
+
+  Initialize the DBIStorage. Must be called before any other DBIStorage primitive.
+
+  **Example code:**
+  
 ```NetLogo
 dbi:DBIStorage-init
 ```
 
 ### `dbi:DBIStorage-add`
-Adds a new DBIAgent to the DBIStorage. The agent is identified by the given name.
+  **Description:**
+  Adds a new DBIAgent to the DBIStorage. The agent is identified by the given name.
 
-:warning: If the agent's name is already bound in the storage, the agent won't be added.
-#### Example code
+  :warning: If the agent's name is already bound in the storage, the agent won't be added.
+  
+   **arguments:**
+   * DBIAgent: the agent to store
+   * String: a save name
+
+   **Example code:**
+   
 ```NetLogo
-dbi:DBIStorage-add DBIAgent "name"
+dbi:DBIStorage-add agent "name"
 ```
-**argument**: String: a save name
-
+    
 ### `dbi:DBIStorage-remove`
-Remove an Agent stored in the DBIStorage.
+  **Description:**
+  Remove an Agent stored in the DBIStorage.
+
+  **argument:** 
+  * String: a save name
+
+  **Example code:**
+  
 ```NetLogo
 dbi:DBIStorage-remove "name"
 ```
-**argument**: String: a save name
 
 ### `dbi:DBIStorage-update`
+   **Description:**
+   Replace a DBIAgent in the storage.
+   
+   **argument:**
+   * String: A save name
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:DBIStorage-update DBIAgent "name"
+dbi:DBIStorage-update agent "name"
 ```
-**argument**: String: a save name
-
+    
 ### `dbi:DBIStorage-get`
+   **Description:**
+    Returns the DBIAgent corresponding to the given name. If the agent doesn't exist, it throws an ExtensionException.
+
+   **argument:**
+   * String: A save name
+   
+   **returns:** a DBIAgent
+   
+   **Example code:**
+   
 ```NetLogo
 dbi:DBIStorage-get "name"
 ```
-**argument**: String: a save name
-
-**returns:** a DBIAgent
 
 ### `dbi:DBIAgent`
-Create an empty DBIAgent.
+   **Description:**
+   Create an empty DBIAgent.
+   
+   **returns:**
+   DBIAgent
+   
+   **Example code:**
+
 ```NetLogo
 dbi:DBIAgent
 ```
-**returns:** a DBIAgent
-
+   
 ### `dbi:DBIAgent-import`
+   **Description:**
+   Import a DBIAgent from an apl file. An Exception can occur if the filename is incorrect or if an error occurs during the file reading.
+   
+   **argument:**
+   * String: the path to the filename to import
+   
+   **returns:** DBIAgent
+   
+   **Example Code:**
+   
 ```NetLogo
 dbi:DBIAgent-import "filename"
 ```
-**argument**: the filename to import as a String
-
-**returns:** a DBIAgent
 
 ### `dbi:DBIAgent-updateBelief`
+   **Description:**
+   Performs belief revision according to a new piece of information (a fact) told by a source with given degree of trust.
+   
+   **arguments:**
+   * DBIAgent: the agent to update
+   * Fact: the new Fact to tell
+   * TruthDegree: the fact's truth degree
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:DBIAgent-updateBelief DBIAgent Fact TruthDegree
+dbi:DBIAgent-updateBelief agent fact truthDegree
 ```
-**argument**:
 
 ### `dbi:DBIAgent-export`
+   **Description:**
+   Export the DBIAgent to a file. An Exception can occur if the file can't be created.
+   
+   **arguments:**
+   * DBIAgent: the agent to export
+   * String: the path to the filename
+   
+   **Example code:**
+    
 ```NetLogo
-dbi:DBIAgent-export DBIAgent "filename"
+dbi:DBIAgent-export agent "filename"
 ```
-**argument**:
 
 ### `dbi:DBIAgent-goalsAsLogoList`
+   **Description:**
+   This reporter returns the agent's goals as a LogoList. This LogoList is a list of Fact that can be iterated over in NetLogo using a foreach loop.
+   
+   **arguments:**
+   * DBIAgent: the agent to retreive the goals
+   
+   **returns:**
+   LogoList of Facts
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:DBIAgent-goalsAsLogoList DBIAgent
+dbi:DBIAgent-goalsAsLogoList agent
 ```
-**argument**: a DBIAgent
-
-**returns:** a LogoList of Fact
-
-### `dbi:DBIAgent-desires`
-```NetLogo
-dbi:DBIAgent-desires DBIAgent
-```
-**argument**: a DBIAgent
-
-**returns:**
-
-### `dbi:DBIAgent-believes`
-```NetLogo
-dbi:DBIAgent-believes DBIAgent
-```
-**argument**: a DBIAgent
-
-**returns:**
 
 ### `dbi:DBIAgent-goalsAsFactSet`
-```NetLogo
-dbi:DBIAgent-goalsAsFactSet DBIAgent
-```
-**returns:** a Factset
+   **Description:**
+   This reporter returns the agent's goals as a Factset. This Factset that can't be iterated over in NetLogo. It is mostly used to get a TruthDegree using the dbi:Factset-membership reporter.
+   
+   **arguments:**
+   * DBIAgent: the agent to retreive the goals
+   
+   **returns:**
+   Factset: the agent's goals as a Factset
 
+   **Example code:**
+
+```NetLogo
+dbi:DBIAgent-goalsAsFactSet agent
+```
+
+### `dbi:DBIAgent-desires`
+  **Description:**
+  This primitive returns the agent's desire truth degree for a fact as a number ( [0,1] ).
+  
+  **arguments:**
+  * DBIAgent: the agent
+  * Fact: the fact to retreive the truth degree
+  
+  **returns:**
+  A number between 0 and 1.
+  
+  **Example code:**
+  
+```NetLogo
+dbi:DBIAgent-desires agent
+```
+
+### `dbi:DBIAgent-believes`
+   **Description:**
+   This reporter takes an agent and a fact and returns the belief factor of the agent for this fact.
+   
+   **arguments:**
+   * DBIAgent: the agent
+   * Fact: the fact to retreive the truth degree
+   
+   **returns:**
+   A number between 0 and 1.
+   
+   **Example code:**
+   
+```NetLogo
+dbi:DBIAgent-believes agent
+```
 
 ### `dbi:Atom`
+   **Description:**
+   Create an Atom by it's name.
+   
+   **argument:**
+   * String: the Atom's name
+   
+   **returns:**
+   Atom
+   
+   **Example code:**
+   
 ```NetLogo
 dbi:Atom "name"
 ```
-**argument**: the Atom name as a String
-
-**returns:** an Atom
 
 ### `dbi:Atom-getName`
-**Description:** This primitive returns the given Atom's name. It can be usefull for handling the decision taken by the DBIAgent in the Netlogo code as the name can stand for a purpose (ex: "buy", "sell", ...)
+   **Description:** This primitive returns the given Atom's name. It can be usefull for handling the decision taken by the DBIAgent in the Netlogo code as the name can stand for a purpose (ex: "buy", "sell", ...)
 
-**argument**: the Atom
+   **argument:**
+   * Atom: the atom
 
-**returns:** a String, the Atom's name
+   **returns:**
+   String: the Atom's name
 
-**Code example**
+   **Code example**
+   
 ```NetLogo
-dbi:Atom-getName Atom
+dbi:Atom-getName atom
 ```
 
 ### `dbi:Formula`
+   **Description:**
+   Create a Formula object.
+   
+   **arguments:**
+   * Operator: an operator of arity n
+   * LogoList: a list of n Formula
+   
+   **returns:**
+   Formula:  a logical formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:Formula
+dbi:Formula operator formulaList
 ```
-**returns:** a Formula
 
 ### `dbi:Formula-fromAtom`
+   **Description:**
+   Create a Formula object from an Atom. The resulting formula is called atomic and only composed of the atom. This formula does not contain any Operator.
+   
+   **argument:**
+   * Atom: the atom to create a formula from
+   
+   **returns:**
+   Formula: a formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:Formula-fromAtom Atom
+dbi:Formula-fromAtom atom
 ```
-**argument**: an Atom
-
-**returns:** a Formula
 
 ### `dbi:Formula-fromFact`
+   **Description:**
+   Create a Formula object from a Fact.
+   
+   **argument:**
+   * Fact: a fact
+   
+   **returns:**
+   Formula: the created formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-fromFact fact
 ```
-**returns:** a Formula
-
+    
 ### `dbi:Operator`
+   **Description:**
+   Create an Operator. This method takes different types of arguments. The two ways to create an Operator are:
+   * Create a default Operator (AND, OR, NOT, XOR) by using only one argument, the operator name as a String. **Example:**
+ ```NetLogo
+ dbi:Operator "not"
+ ```
+   * Create a custom Operator by specifying two arguments: a name (String) and its arity (integer). **Example:**
 ```NetLogo
-dbi:
+dbi:Operator "myOp" 2
 ```
-**returns:** an Operator
+   
+   **returns:**
+    Operator: The created Operator
 
 ### `dbi:Operator-toExtensionType`
-```NetLogo
-dbi:
-```
-**returns:** an ExtensionObject containing an Operator
+   **Description:**
+   the ExtensionType reporter are primitives used to display informations about the object. It's the `` toString() ``
+   equivalent. It should be used only to display objects using the primitive `` show ``.
+   
+  **argument:**
+  * Operator: an operator object
+  
+  **returns:** an ExtensionObject containing an Operator
+  
+  **Example code:**
+  
+  ```NetLogo
+  dbi:Operator:toExtensionType
+  ```
 
 ### `dbi:PropositionalFormula`
+   **Description:**
+   Create a PropositionalFormula object. The number of formulas given in the arguments must match the operator arity
+   
+   **arguments:**
+   * Operator: a root operator
+   * Formula: one or more formula
+   
+   **returns:**
+   PropositionalFormula: a propositional formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:PropositionalFormula andOp formula1 formula2
 ```
-**returns:** a PropositionalFormula
+
+```NetLogo
+dbi:PropositionalFormula not formula
+```
 
 ### `dbi:PropositionalFormula-fromAtom`
+   **Description:**
+    Create a PropositionalFormula from an Atom. The returned formula is atomic.
+    
+   **argument:**
+   * Atom: an atom
+    
+   **returns:**
+   PropositionalFormula: a propositional formula
+    
+   **Example code:**
+    
 ```NetLogo
-dbi:
+dbi:PropositionalFormula-fromAtom atom
 ```
-**returns:** a PropositionalFormula
 
 ### `dbi:PropositionalAtom`
+   **Description:**
+   Create a PropositionalAtom by it's name.
+   
+   **argument:**
+   * String: the atom's name
+   
+   **returns:**
+   PropositionalAtom: the created propositional atom
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:PropositionalAtom "name"
 ```
-**returns:** a PropositionalAtom
-
-
-### `dbi:Proposition`
-```NetLogo
-dbi:
-```
-**returns:** a Propositional
-
-### `dbi:Fact`
-```NetLogo
-dbi:
-```
-**returns:** a Fact
 
 ### `dbi:Fact-fromFormula`
+   **Description:**
+   Create a Fact objet from a Formula. Facts can be used to update agent beliefs.
+   
+   **argument:**
+   * Formula: a formula
+   
+   **returns:**
+   Fact: a fact
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-fromFormula formula
 ```
-**returns:** a Fact
 
 ### `dbi:Fact-negate`
+   **Description:**
+   Returns the given fact's negatation.
+   
+   **argument:**
+   * Fact: the fact to negate
+   
+   **returns:**
+   Fact: the fact's negation
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-negate fact
 ```
-**returns:** a Fact
 
 ### `dbi:Fact-getFormula`
+   **Description:**
+   Returns the Fact's formula. Usefull to extract DBIAgent's goals.
+   
+   **argument:**
+   * Fact: a fact
+   
+   **returns:**
+   Formula: the fact's formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-getFormula fact
 ```
-**returns:** a Formula
 
 ### `dbi:Factset-membership`
+   **Description:**
+   Returns the Fact's TruthDegree.
+   
+   **argument:**
+   * Factset: a fact set
+   * Fact: the fact to retreive the truth degree
+   
+   **returns:**
+   TruthDegree: the fact's truth degree
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Factset-membership
 ```
-**returns:** a TruthDegree
 
 ### `dbi:TruthDegree-doubleValue`
+   **Description:**
+   Reporter used to retreive a truth degree as a number between 0 and 1.
+   
+   **argument:**
+   * TruthDegree: the truth degree to convert
+   
+   **returns:**
+   Number between 0 and 1
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:TruthDegree-doubleValue
 ```
-**returns:** a Number
 
 ### `dbi:Utils-removeDuplicates`
+   **Description:**
+   Util function used in the NetLogo simulation to remove duplicate patches (same id) in a LogoList of Patches
+   
+   **argument:**
+   * LogoList of Patches
+   
+   **returns:**
+   LogoList of Patches
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:Utils-removeDuplicates LogoList
+dbi:Utils-removeDuplicates logoList
 ```
-**returns:** a LogoList
-
-
-## Terms of Use
-
-
