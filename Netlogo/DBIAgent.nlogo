@@ -7,7 +7,7 @@ to setup
 end
 
 to import
-  set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\java\\farmer.apl"
+  set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\res\\farmer.apl"
 end
 
 to formulas
@@ -25,7 +25,6 @@ to formulas
   dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula fertile 0.25
   dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula accessible 0.2
 end
-
 
 to showAgent
   show agent
