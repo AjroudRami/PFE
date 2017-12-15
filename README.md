@@ -33,7 +33,7 @@ to setup
 end
 
 to import
-  set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\res\\farmer.apl"
+  set agent dbi:DBIAgent-import "filename"
 end
 
 to formulas
