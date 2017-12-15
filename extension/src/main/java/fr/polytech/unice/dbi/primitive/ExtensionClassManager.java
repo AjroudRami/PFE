@@ -42,7 +42,6 @@ public class ExtensionClassManager extends DefaultClassManager {
         primManager.addPrimitive(Primitives.GET_AGENT_GOALS, new GetGoalLogoList());
         primManager.addPrimitive(Primitives.GET_FACT_DESIRE_FACTOR, new GetDesires());
         primManager.addPrimitive(Primitives.GET_FACT_BELIEF_FACTOR, new GetBeliefs());
-        primManager.addPrimitive(Primitives.CREATE_PROPOSITION, new CreatePropositionalFormula());
         primManager.addPrimitive(Primitives.CREATE_FACT_FROM_FORMULA, new FromFormula());
         primManager.addPrimitive(Primitives.CREATE_FORMULA, new CreateFormula());
         primManager.addPrimitive(Primitives.CREATE_FORMULA_FROM_ATOM, new FromAtom());

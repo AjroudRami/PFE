@@ -6,17 +6,7 @@ to setup
   formulas
 end
 
-
-to showAgent
-  show agent
-end
-
-to showAgentGoals
-  show (dbi:DBIAgent-goalsAsLogoList agent)
-end
-
 to import
-  dbi:DBIStorage-init
   set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\java\\farmer.apl"
 end
 
@@ -34,6 +24,19 @@ to formulas
   dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula notViable 1
   dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula fertile 0.25
   dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula accessible 0.2
+end
+
+
+to showAgent
+  show agent
+end
+
+to showAgentGoals
+  foreach (dbi:DBIAgent-goalsAsLogoList agent) [
+    fact -> foreach ( dbi:Formula-getAtoms dbi:Fact-getFormula fact) [
+     atom -> show dbi:Atom-getName atom
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW

@@ -9,7 +9,7 @@ import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
 /**
- * This class implements a Netlogo fr.polytech.unice.dbi.primitive that is used to create a logical operator
+ * This class implements a Netlogo primitive that is used to create a logical operator
  */
 public class CreateOperator implements Reporter {
 

@@ -9,6 +9,9 @@ import org.nlogo.api.Reporter;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
+/**
+ * This primitive returns the agent's desire truth degree for a fact as a double
+ */
 public class GetDesires implements Reporter {
 
 

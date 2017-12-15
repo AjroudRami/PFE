@@ -80,12 +80,6 @@ public class Primitives {
 
 
     /**
-     * Proposition primitives
-     */
-    public static final String CREATE_PROPOSITION = "Proposition";
-
-
-    /**
      * Fact primitives
      */
     //Name
