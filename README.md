@@ -24,6 +24,47 @@ This extension adds DBI Agents to NetLogo.
 
 ### How to use
 
+Here is an example of usage. Replace the filename variable by the filename.
+
+```NetLogo
+to setup
+  import
+  formulas
+end
+
+to import
+  set agent dbi:DBIAgent-import "filename"
+end
+
+to formulas
+  let viable dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "viable"
+  let fertile dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "fertile"
+  let accessible dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "accessible"
+
+  let notOp dbi:Operator "not"
+
+  let notViable dbi:PropositionalFormula notOp viable
+  let notFertile dbi:PropositionalFormula notOp fertile
+  let notAccessible dbi:PropositionalFormula notOp accessible
+
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula notViable 1
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula fertile 0.25
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula accessible 0.2
+end
+
+to showAgent
+  show agent
+end
+
+to showAgentGoals
+  foreach (dbi:DBIAgent-goalsAsLogoList agent) [
+    fact -> foreach ( dbi:Formula-getAtoms dbi:Fact-getFormula fact) [
+     atom -> show dbi:Atom-getName atom
+    ]
+  ]
+end
+```
+
 ### Known Issues
 
 ### Credits
