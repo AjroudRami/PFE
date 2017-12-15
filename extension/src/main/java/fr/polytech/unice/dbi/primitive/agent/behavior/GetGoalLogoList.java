@@ -4,16 +4,19 @@ import fr.polytech.unice.dbi.businessData.DBIAgent;
 import kobdig.agent.Fact;
 import kobdig.agent.FactSet;
 import org.nlogo.api.*;
+import org.nlogo.core.LogoList;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
 
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * This class implements a fr.polytech.unice.dbi.primitive used to retreive the DBI Agent Goals
  */
 public class GetGoalLogoList implements Reporter {
 
+    private static Logger LOGGER = Logger.getLogger(GetGoalLogoList.class.getName());
     /**
      * This fr.polytech.unice.dbi.primitive returns a FactSet bundled in a LogoList object
      *
@@ -28,6 +31,9 @@ public class GetGoalLogoList implements Reporter {
         FactSet facts = dbi.goals();
         Iterator<Fact> iterator = facts.factIterator();
         LogoListBuilder builder = new LogoListBuilder();
+        if (!iterator.hasNext()) {
+            return LogoList.Empty();
+        }
         while (iterator.hasNext()) {
             builder.add(iterator.next());
         }
