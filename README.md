@@ -67,11 +67,7 @@ This extension adds DBI Agents to NetLogo.
 ### PropositionalAtom primitives
 [`dbi:PropositionalAtom`](#dbipropositionalatom)
 
-### Proposition primitives
-[`dbi:Proposition`](#dbiproposition)
-
 ### Fact primitives
-[`dbi:Fact`](#dbifact)
 [`dbi:Fact-fromFormula`](#dbifact-fromformula)
 [`dbi:Fact-negate`](#dbifact-negate)
 [`dbi:Fact-getFormula`](#dbifact-getformula)
@@ -204,7 +200,7 @@ dbi:DBIAgent-updateBelief agent fact truthDegree
    * DBIAgent: the agent to export
    * String: the path to the filename
    
-    **Example code:**
+   **Example code:**
     
 ```NetLogo
 dbi:DBIAgent-export agent "filename"
@@ -401,7 +397,7 @@ dbi:Operator "myOp" 2
    **Example code:**
    
 ```NetLogo
-dbi:PropositionalFormula and formula1 formula2
+dbi:PropositionalFormula andOp formula1 formula2
 ```
 
 ```NetLogo
@@ -412,13 +408,13 @@ dbi:PropositionalFormula not formula
    **Description:**
     Create a PropositionalFormula from an Atom. The returned formula is atomic.
     
-    **argument:**
-    * Atom: an atom
+   **argument:**
+   * Atom: an atom
     
-    **returns:**
-    PropositionalFormula: a propositional formula
+   **returns:**
+   PropositionalFormula: a propositional formula
     
-    **Example code:**
+   **Example code:**
     
 ```NetLogo
 dbi:PropositionalFormula-fromAtom atom
@@ -440,50 +436,99 @@ dbi:PropositionalFormula-fromAtom atom
 dbi:PropositionalAtom "name"
 ```
 
-### `dbi:Proposition`
-```NetLogo
-dbi:
-```
-**returns:** a Propositional
-
-### `dbi:Fact`
-```NetLogo
-dbi:
-```
-**returns:** a Fact
-
 ### `dbi:Fact-fromFormula`
+   **Description:**
+   Create a Fact objet from a Formula. Facts can be used to update agent beliefs.
+   
+   **argument:**
+   * Formula: a formula
+   
+   **returns:**
+   Fact: a fact
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-fromFormula formula
 ```
-**returns:** a Fact
 
 ### `dbi:Fact-negate`
+   **Description:**
+   Returns the given fact's negatation.
+   
+   **argument:**
+   * Fact: the fact to negate
+   
+   **returns:**
+   Fact: the fact's negation
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-negate fact
 ```
-**returns:** a Fact
 
 ### `dbi:Fact-getFormula`
+   **Description:**
+   Returns the Fact's formula. Usefull to extract DBIAgent's goals.
+   
+   **argument:**
+   * Fact: a fact
+   
+   **returns:**
+   Formula: the fact's formula
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Fact-getFormula fact
 ```
-**returns:** a Formula
 
 ### `dbi:Factset-membership`
+   **Description:**
+   Returns the Fact's TruthDegree.
+   
+   **argument:**
+   * Factset: a fact set
+   * Fact: the fact to retreive the truth degree
+   
+   **returns:**
+   TruthDegree: the fact's truth degree
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:Factset-membership
 ```
-**returns:** a TruthDegree
 
 ### `dbi:TruthDegree-doubleValue`
+   **Description:**
+   Reporter used to retreive a truth degree as a number between 0 and 1.
+   
+   **argument:**
+   * TruthDegree: the truth degree to convert
+   
+   **returns:**
+   Number between 0 and 1
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:
+dbi:TruthDegree-doubleValue
 ```
-**returns:** a Number
 
 ### `dbi:Utils-removeDuplicates`
+   **Description:**
+   Util function used in the NetLogo simulation to remove duplicate patches (same id) in a LogoList of Patches
+   
+   **argument:**
+   * LogoList of Patches
+   
+   **returns:**
+   LogoList of Patches
+   
+   **Example code:**
+   
 ```NetLogo
-dbi:Utils-removeDuplicates LogoList
+dbi:Utils-removeDuplicates logoList
 ```
-**returns:** a LogoList
