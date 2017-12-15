@@ -2,7 +2,7 @@ enablePlugins(org.nlogo.build.NetLogoExtension)
 
 netLogoExtName := "dbi"
 
-netLogoClassManager := "primitive.ExtensionClassManager"
+netLogoClassManager := "fr.polytech.unice.dbi.primitive.ExtensionClassManager"
 
 scalaVersion           := "2.11.7"
 

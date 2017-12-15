@@ -1,9 +1,9 @@
+import fr.polytech.unice.dbi.primitive.logic.factSet.Membership;
+import fr.polytech.unice.dbi.util.TestArgument;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nlogo.api.ExtensionException;
-import primitive.logic.factSet.Membership;
-import util.TestArgument;
 
 @RunWith(org.junit.runners.JUnit4.class)
 public class TestDBI {
