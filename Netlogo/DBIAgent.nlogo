@@ -7,7 +7,7 @@ to setup
 end
 
 to import
-  set agent dbi:DBIAgent-import "D:\\Data\\Projects\\PFE\\extension\\src\\main\\res\\farmer.apl"
+  set agent dbi:DBIAgent-import "C:\\Users\\Jeremy\\IdeaProjects\\PFE\\extension\\src\\main\\res\\farmer.apl"
 end
 
 to formulas
@@ -66,12 +66,46 @@ ticks
 30.0
 
 BUTTON
-118
-76
+102
+21
 181
-109
+54
 NIL
-setup
+ca\nsetup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+654
+60
+748
+93
+NIL
+showAgent\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+653
+22
+777
+55
+NIL
+showAgentGoals\n
 NIL
 1
 T

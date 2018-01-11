@@ -18,6 +18,7 @@ patches-own [ country-name route pedo]
 
 to setup
   clear-all
+  reset-ticks
   gis:load-coordinate-system(word "shapefile/raster-VoiesFrejus/VoiesFrejus_Lbt93.prj")
   ;set countries-dataset gis:load-dataset "shapefile/countries/ne_50m_admin_0_countries.shp"
   ;set airports-dataset gis:load-dataset "shapefile/airport/ne_10m_airports.shp"
@@ -27,9 +28,9 @@ to setup
   set pedo2-dataset gis:load-dataset "shapefile/pedopaysage/pedopayscite2.asc"
   gis:set-world-envelope(gis:envelope-union-of (gis:envelope-of agglo-frejus-dataset)
     (gis:envelope-of voies-frejus-dataset)
-    (gis:envelope-of pedo2-dataset)
-  (gis:envelope-of ville-frejus-dataset))
-  reset-ticks
+  (gis:envelope-of ville-frejus-dataset)
+  (gis:envelope-of pedo2-dataset))
+
   ask patches[set pcolor white]
   ask patch 15 15 [set pcolor red]
 end
@@ -59,6 +60,9 @@ to display-pedo
   ask patches [
     if (pedo <= 0) or (pedo >= 0) [ set pcolor scale-color green pedo min-pedo max-pedo]
   ]
+
+  show min-pedo
+  show max-pedo
 end
 
 to display-agglo-frejus
@@ -314,6 +318,40 @@ BUTTON
 97
 NIL
 display-pedo\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+267
+440
+368
+473
+Settings 400
+set-patch-size 1\nresize-world -200 200 -200 200\nsetup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+391
+440
+485
+473
+Settings 70
+set-patch-size 5\nresize-world -70 70 -70 70\nsetup
 NIL
 1
 T

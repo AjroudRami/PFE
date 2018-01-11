@@ -1,0 +1,70 @@
+extensions [dbi]
+globals [agent]
+
+to doBDI
+setupBDI
+showAgent
+showAgentGoals  
+end
+
+to setupBDI
+  importBDI
+  ;formulas
+end
+
+to importBDI
+  set agent dbi:DBIAgent-import "C:\\Users\\Jeremy\\IdeaProjects\\PFE\\extension\\src\\main\\res\\farmer.apl"
+end
+
+to-report farmer-bdi
+  report dbi:DBIAgent-import "C:\\Users\\Jeremy\\IdeaProjects\\PFE\\extension\\src\\main\\res\\farmer.apl"
+end
+
+to-report valueViable [viabilite]
+  ifelse viabilite [report 0][report 1]
+end
+
+to-report valueFertile [prod]
+  ifelse prod > 0 [report 1][report 0]
+end
+
+to-report valueAccessible [access]
+  ifelse access < 100 [report 1] [report 0]
+end
+
+to formulas
+  let viable dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "viable"
+  let fertile dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "fertile"
+  let accessible dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "accessible"
+
+  let notOp dbi:Operator "not"
+
+  let notViable dbi:PropositionalFormula notOp viable
+  let notFertile dbi:PropositionalFormula notOp fertile
+  let notAccessible dbi:PropositionalFormula notOp accessible
+
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula notViable 0
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula fertile 1
+  dbi:DBIAgent-updateBelief agent dbi:Fact-fromFormula accessible 1
+end
+
+to showAgent
+  show agent
+end
+
+to showAgentGoals
+  foreach (dbi:DBIAgent-goalsAsLogoList agent) [
+    fact -> foreach ( dbi:Formula-getAtoms dbi:Fact-getFormula fact) [
+     atom -> show dbi:Atom-getName atom
+    ]
+  ]
+end
+
+to-report agent-goals [agen]
+  foreach (dbi:DBIAgent-goalsAsLogoList agen) [
+    fact -> foreach ( dbi:Formula-getAtoms dbi:Fact-getFormula fact) [
+     atom -> report dbi:Atom-getName atom
+    ]
+  ]
+  report ""
+end

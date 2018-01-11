@@ -1,7 +1,7 @@
 ;Ajout d'extension java
-extensions[dbi_agents]
+
 ;Ajout de fichiers "foo.nls" contenant du code NetLogo
-__includes["include-output.nls" "include-setup.nls" "include-utils.nls" "include-gisFiles.nls" ]
+__includes["include-output.nls" "include-setup.nls" "include-utils.nls" "include-gisFiles.nls" "include-BDI.nls" ]
 
 ;Définition des variables globales du modèle
 globals[
@@ -17,7 +17,7 @@ breed [towns town]
 ;Définition des attributs des différents agents
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought ]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought cerveau-bdi ]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -30,8 +30,6 @@ towns-own [ location taille isCapital listofpatch ]
 ;;ODD COMMENTAIRE
 ;;Output 29 & 30 ????
 ;;t1 : 22->24 ??!!! Aucun modele de cout difficile de faire ça
-;;Ajouter des doubles des variables pour avoir les stats sur les villas quand elles seront là
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;FONCTIONS PRINCIPALES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -151,8 +149,8 @@ to abandon
   let _cap one-of towns with [isCapital]
 
   ;Si un aristocrat abandonne sa villa qui est sous l'influence de la capitale il DOIT en recréer une proche de la capitale
-  ;sinon on créer simplement une exploitation supplémentaires
-  ifelse _r = "aristocrat" and _t ="villa" and distance _cap < 27  [ create-near-capital][ creation]
+  ;sinon on créer simplement une exploitation supplémentaire
+  ifelse _r = "aristocrat" and _t ="villa" and distance _cap < 27  [ create-near-capital ][ creation]
 
   ask owner _nameOwner [
     set numberOfexploitation numberofExploitation - 1
@@ -243,8 +241,9 @@ to chooseRentableExploitationAndExpand
     let _numb [numberOfExploitation] of owner _nameOwner
     let _maxn [maxNumberExploit] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
     ;goodprofit est le profit que rapporte cette nouvelle exploitation
+    ;_profit est le seuil de rentabilité d'une farm ou d'une villa
     if (_goodprofit > _profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
-  ]; fin if
+  ]; fin if probablygood
 end
 
 
@@ -254,7 +253,7 @@ to calculHigherEqualLowerProfit
   ask owners [
     ifelse rank = "aristocrat" [ cmd1 ]
     [ifelse rank = "rich" [cmd2]
-    [cmd3]] ;;farmers
+    [cmd3-bdi]] ;;farmers
   ]
 end
 
@@ -281,6 +280,30 @@ ifelse money < oldmoney [checkProfitDecreasedFarmer ]
   [ ifelse money > oldmoney [checkProfitIncreased ]
     [checkProfitEquivalentFarmer ]
   ]
+end
+
+to cmd3-bdi
+  let viable dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "viable"
+  let fertile dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "fertile"
+  let accessible dbi:PropositionalFormula-fromAtom dbi:PropositionalAtom "accessible"
+
+  let notOp dbi:Operator "not"
+
+  let notViable dbi:PropositionalFormula notOp viable
+  let _viable 0
+  foreach listExploitation [
+    [exploit] -> ask exploit [
+      set _viable totalproduction < profit-farm
+      dbi:DBIAgent-updateBelief ([cerveau-bdi] of owner landowner) dbi:Fact-fromFormula viable 0.1;(valueViable _viable)
+      dbi:DBIAgent-updateBelief ([cerveau-bdi] of myself) dbi:Fact-fromFormula fertile 1;valueFertile totalproduction
+      dbi:DBIAgent-updateBelief [cerveau-bdi] of myself dbi:Fact-fromFormula accessible 1;valueAccessible totalaccesibility
+      dbi:DBIAgent-updateBelief [cerveau-bdi] of myself dbi:Fact-fromFormula notViable 1;valueAccessible totalaccesibility
+      let gol agent-goals [cerveau-bdi] of myself
+      ifelse gol = "enlarge" [ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][maintain]]
+          [ifelse gol = "leave" [abandon][maintain]]
+    ]
+  ]
+
 end
 
 
@@ -317,7 +340,7 @@ to checkProfitIncreasedFarmer ;Augmentation Profit
 foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      if (totalproduction - totalaccesibility) > _profit [if length listofpatches < maxsizeofland [enlarge2 listofpatches]]
+      if (totalproduction - totalaccesibility) > _profit [ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][maintain]]
     ]
   ]
 end
@@ -780,10 +803,10 @@ show-color?
 -1000
 
 BUTTON
-84
-346
-176
-379
+61
+307
+153
+340
 NIL
 show-color\n
 NIL
@@ -797,12 +820,29 @@ NIL
 1
 
 BUTTON
-63
-168
-146
-201
+59
+161
+142
+194
 BeforeGo
 clear\nload-climatique\nsetup\ntest
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+70
+128
+135
+161
+NIL
+doBDI
 NIL
 1
 T

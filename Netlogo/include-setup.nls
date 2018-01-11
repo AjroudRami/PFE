@@ -50,16 +50,18 @@ end
 
 ;Crée les "owners" et associe un rang à chacun d'eux
 to setupLandOwners
-  create-owners (5)
+  create-owners (10)
   ask owners [
     set color random(100)
-    set rank item random(3) ["farmers" "rich" "aristocrat"]
+    set rank item 0 ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
+    if rank = "farmers" [import-BDI cerveau-bdi show cerveau-bdi]
+    
     set listExploitation []
   ]
 end
-
-;;Associe à chaque owners : son pouvoir éco, son nombre max d'éablissements, son rayon d'action (selon son rang)
+;;FUSION
+;;Associe à chaque owners : son pouvoir éco, son nombre max d'établissements, son rayon d'action (selon son rang)
 to setupmoney
   ask owners[
   ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 1]
@@ -67,7 +69,7 @@ to setupmoney
     [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
   ]
 end
-
+;;FUSION
 ;Associe un nombre aléatoire d'exploitations à chaque owners et
 ;les crée aléaoirement dans le monde
 to setupExploitationPerOwners
@@ -91,7 +93,7 @@ to setupSymbolic
     if distance one-of towns with [isCapital] < 27 [set symbolicvalue symbolicvalue + 1]
   ]
 end
-
+;;FUSION
 ;Associe aléatoirement la présence de structures agricoles sur les patches (pieces of lands) des exploitations
 to setupAgricultureStructure
   ask exploitations[
@@ -100,7 +102,7 @@ to setupAgricultureStructure
     ]
   ]
 end
-
+;;FUSION
 ;Associe un nombre d'années aléatoire d'exploitation aux patches (pieces of lands) des exploitations  
 to setupYearsOfExploitation
   ask exploitations[

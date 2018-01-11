@@ -145,13 +145,13 @@ to create-near-capital
       set symbolicvalue random(4)
       set color [color] of owner _own
       set totalproduction 0
-     do-villa 
+      do-villa 
       repeat minsizeofland [ enlarge2 listofpatches ]
       set notRentable 0
       set totalaccesibility 0
       ask owner _own [
           set listExploitation lput myself listExploitation
-          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+          set villabought villabought + 1 
       ] ;; fin ask owner
     ] ;; fin sprout
   ] ;; fin ask emplacement
