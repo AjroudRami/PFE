@@ -27,7 +27,7 @@ to addStructure
   ask setpatch with [haveTools = false] [
     set haveTools true
   ]
-  set managed managed + 1
+  
 end
 
 ;Fonction qui change le climat tout les 5 ticks
@@ -70,16 +70,12 @@ let file "climatique.txt"
      file-close
 end
 
-;Applique des changements de couleurs
-to show-color
-  ifelse show-color?
-  [setupcolorlandscape colorville colorexploitation];true
-  [
-    coloring-pedo-paysage
-    colorville
-    colorexploitation
-  ]  ;false
+;;Called by owners ;Set color of farm
+to color-owners
+  ifelse rank = "aristocrat" [set color [100 255 255] set color-villa [20 0 239] ][ifelse rank = "rich" [set color [255 255 102] set color-villa [255 10 0]] [set color [255 70 180]]]
 end
+
+
 
 ;colorie les villes
 to colorville

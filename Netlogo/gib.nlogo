@@ -17,7 +17,7 @@ breed [towns town]
 ;Définition des attributs des différents agents
 
 ;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought cerveau-bdi ]
+owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought cerveau-bdi color-villa ]
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
@@ -38,7 +38,6 @@ towns-own [ location taille isCapital listofpatch ]
 ;;Remise à zéro de la simulation
 to clear
   ca
-  reset-ticks
 end
 
 ;Fonction qui appelle les setups de l'environnement et des différentes entités
@@ -58,10 +57,13 @@ to setup
   setupYearsOfExploitation
   randomEcoPowerOwners
   init-stats ;include-outpus.nls
+  reset-ticks
+
 end
 
 ;Fonction qui fait avancer le monde
 to go
+  init-stats
   if (ticks >= 300) [
     stats-maison ;include-output.nls
     stop]
@@ -74,6 +76,7 @@ to go
   changeClimat ; include-uils
 
   stats-surface
+
   tick
 end
 
@@ -165,7 +168,6 @@ to abandon
   ]
 
 
-  set abandonned abandonned + 1
   set avgSizeA avgSizeA + length listofpatches
   die ;; tue l'exploitation non rentable
 end
@@ -213,21 +215,20 @@ to chooseRentableExploitationAndExpand
       set pcolor [color] of owner _nameOwner
       set exploited true
       sprout-exploitations 1 [
-        set createdEx createdEx + 1
         set landowner _nameOwner
         set shape "house"
         set listofpatches (list patch-here)
         set symbolicvalue random(4)
         set totalproduction 0
         set notRentable 0
-        set color [color] of owner landowner
         set totalaccesibility 0
 
         ;Si l'owner n'a pas son minimum de villa alors cette nouvelle exploitation en sera une
         ;sinon ce sera une ferme
         ifelse not-enough-villa? [do-villa][do-farm]
         ;On regarde si l'exploitation nouvellement crée est High/Low rentable
-        ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+        ifelse typeOfExploitation = "farm" [set _profit profit-farm set farm-created farm-created + 1 set color [color] of owner landowner]
+        [set _profit profit-villa set villa-created villa-created + 1 set color [color-villa] of owner landowner]
         repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
         set totalaccesibility (mean [accessibility] of (patch-set listofpatches))
@@ -308,6 +309,7 @@ to cmd3-bdi
 end
 
 
+
 ;Choix concernant les exploitations des fermiers
 ;called by owners
 to checkProfitDecreasedFarmer ;Baisse de profit
@@ -315,8 +317,8 @@ to checkProfitDecreasedFarmer ;Baisse de profit
   foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) > _profit [ maintain ]
-      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain set farm-maintained farm-maintained + 1]
+      [ ifelse notRentable > 1 [ abandon set farm-abandonned farm-abandonned + 1] [set notRentable (notRentable + 1)]
     ]
   ]
   ]
@@ -328,8 +330,8 @@ to checkProfitEquivalentFarmer ; Profit Equivalent
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) > _profit [ maintain]
-      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain set farm-maintained farm-maintained + 1]
+      [ ifelse notRentable > 1 [ abandon set farm-abandonned farm-abandonned + 1] [set notRentable (notRentable + 1)]
     ]
   ]
   ]
@@ -341,7 +343,7 @@ to checkProfitIncreasedFarmer ;Augmentation Profit
 foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      if (totalproduction - totalaccesibility) > _profit [ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches][maintain]]
+      if (totalproduction - totalaccesibility) > _profit [ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches set farm-enlarged farm-enlarged + 1][maintain set farm-maintained farm-maintained + 1]]
     ]
   ]
 end
@@ -354,8 +356,8 @@ to checkProfitDecreased ; Baisse de profit
   foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) > _profit [maintain]
-      [ ifelse notRentable > 1 [ abandon] [set notRentable (notRentable + 1)]
+      ifelse (totalproduction - totalaccesibility) > _profit [maintain ifelse typeOfExploitation = "farm"[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]]
+      [ ifelse notRentable > 1 [ abandon ifelse typeOfExploitation = "farm"[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]] [set notRentable (notRentable + 1)]
     ]
   ]
   ]
@@ -367,8 +369,8 @@ to checkProfitEquivalent ; Profit Equivalent
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) > _profit [ maintain creation]
-      [ ifelse symbolicvalue > 0 [ maintain] [abandon]
+      ifelse (totalproduction - totalaccesibility) > _profit [ maintain creation ]
+      [ ifelse symbolicvalue > 0 [ maintain ifelse typeOfExploitation = "farm"[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]] [abandon ifelse typeOfExploitation = "farm"[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]]
     ]
   ]
   ]
@@ -380,8 +382,8 @@ to checkProfitIncreased ;Augmentation du profit
    foreach listExploitation [
     [exploit] -> ask exploit [
       ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve]
-      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches show "YOUHOU"][creation show "NULL"]]
+      ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve ifelse typeOfExploitation = "farm"[set farm-managed farm-managed + 1][set villa-managed villa-managed + 1]]
+      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches ifelse typeOfExploitation = "farm"[set farm-enlarged farm-enlarged + 1][set villa-enlarged villa-enlarged + 1] ][creation ]]
     ]
   ]
 end
@@ -465,10 +467,10 @@ NIL
 1
 
 PLOT
-1022
-17
-1222
-167
+932
+12
+1132
+162
 Owners Money in time
 NIL
 NIL
@@ -483,10 +485,10 @@ PENS
 "" 1.0 0 -11085214 true "" "ask owners [\n create-temporary-plot-pen (word who)\n set-plot-pen-color color\n plotxy ticks money\n ]"
 
 BUTTON
-70
-206
-141
-239
+75
+303
+146
+336
 NIL
 go
 T
@@ -498,115 +500,6 @@ NIL
 NIL
 NIL
 0
-
-MONITOR
-993
-511
-1059
-556
-Fermes
-count exploitations with [typeOfExploitation = 0]
-17
-1
-11
-
-MONITOR
-1222
-263
-1292
-308
-Villa
-count exploitations with [typeOfExploitation = 1]
-17
-1
-11
-
-TEXTBOX
-1188
-467
-1338
-485
-Model Output
-13
-0.0
-1
-
-MONITOR
-993
-559
-1079
-604
-Created Farm
-createdEx
-17
-1
-11
-
-MONITOR
-1086
-558
-1172
-603
-Maintained Farm
-maintained
-17
-1
-11
-
-MONITOR
-1178
-558
-1265
-603
-Enlarged Farm
-enlarged
-17
-1
-11
-
-MONITOR
-1274
-558
-1362
-603
-Abandonned farm
-abandonned
-17
-1
-11
-
-MONITOR
-1268
-612
-1382
-657
-Abandonned Farm
-avgSizeA / abandonned
-2
-1
-11
-
-MONITOR
-1061
-614
-1150
-659
-Created Farm
-avgSizeC / createdEx
-2
-1
-11
-
-MONITOR
-1155
-614
-1259
-659
-Maintained Farm
-avgSizeM / maintained
-2
-1
-11
 
 MONITOR
 994
@@ -664,167 +557,20 @@ surfaceExploitSediment * 100
 11
 
 TEXTBOX
-952
-623
-1049
-641
-Average Size ->
-13
-0.0
-1
-
-TEXTBOX
-926
-662
-1076
-694
+1124
+644
+1274
+676
 % of surface exploited by landscape unit
 13
 0.0
 1
 
-MONITOR
-949
-216
-1007
-261
-Farmers
-count owners with [rank = \"farmers\"]
-2
-1
-11
-
-MONITOR
-1015
-215
-1102
-260
-Big landowners
-count owners with [rank = \"rich\"]
-17
-1
-11
-
-MONITOR
-1110
-215
-1183
-260
-Aristocrats
-count owners with [rank = \"aristocrat\"]
-17
-1
-11
-
-TEXTBOX
-957
-172
-1171
-204
-Number of each type of Landowners\n
-13
-0.0
-1
-
-MONITOR
-1056
-270
-1173
-315
-Aristo Moyenne Farms
-mean [farmbought] of owners with [rank = \"aristocrat\"]
-2
-1
-11
-
-MONITOR
-1058
-319
-1171
-364
-Aristo Min Farms
-min [farmbought] of owners with [rank = \"aristocrat\"]
-2
-1
-11
-
-MONITOR
-1061
-373
-1170
-418
-Aristo Max Farms
-max [farmbought] of owners with [rank = \"aristocrat\"]
-2
-1
-11
-
-MONITOR
-932
-372
-1056
-417
-BigOwner Max Farm
-max [farmbought] of owners with [rank = \"rich\"]
-2
-1
-11
-
-MONITOR
-935
-321
-1054
-366
-BigOwner Min Farm
-min [farmbought] of owners with [rank = \"rich\"]
-2
-1
-11
-
-MONITOR
-932
-268
-1052
-313
-BigOwner Mean Farms
-mean [farmbought] of owners with [rank = \"rich\"]
-2
-1
-11
-
-SWITCH
-54
-260
-175
-293
-show-color?
-show-color?
-1
-1
--1000
-
 BUTTON
-61
-307
-153
-340
-NIL
-show-color\n
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-59
-161
-142
-194
+72
+249
+155
+282
 BeforeGo
 clear\nload-climatique\nsetup\ntest
 NIL
@@ -852,6 +598,195 @@ NIL
 NIL
 NIL
 NIL
+1
+
+PLOT
+1134
+12
+1334
+162
+Pourcentage Villa/Fermes
+Ticks
+%
+0.0
+10.0
+0.0
+100.0
+true
+true
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot ((count exploitations with [typeOfExploitation = \"villa\"]) / count exploitations) * 100"
+"pen-1" 1.0 0 -14070903 true "" "plot ((count exploitations with [typeOfExploitation = \"farm\"]) / count exploitations) * 100"
+
+PLOT
+930
+164
+1125
+293
+Pourcentage de fonciers de chaque type restants
+Ticks
+%
+0.0
+10.0
+0.0
+100.0
+true
+true
+"" ""
+PENS
+"Aristocrat" 1.0 0 -13791810 true "" "plot ((count owners with [rank = \"aristocrat\"]) * 100 / count owners) "
+"Big landowner" 1.0 0 -723837 true "" "plot ((count owners with [rank = \"rich\"])  * 100 / count owners)"
+"Farmers" 1.0 0 -1664597 true "" "plot ((count owners with [rank = \"farmers\"]) * 100 / count owners) "
+
+PLOT
+1126
+163
+1312
+293
+ Farm : # d'actions par step
+Ticks
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"creation" 1.0 0 -16777216 true "" "plot farm-created"
+"maintained" 1.0 0 -7500403 true "" "plot farm-maintained"
+"enlarged" 1.0 0 -2674135 true "" "plot farm-enlarged"
+"managed" 1.0 0 -955883 true "" "plot farm-managed"
+"abandonned" 1.0 0 -6459832 true "" "plot farm-abandonned"
+
+PLOT
+1313
+160
+1493
+293
+Villa : # d'actions par step
+Ticks
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"created" 1.0 0 -16777216 true "" "plot villa-created"
+"maintained" 1.0 0 -7500403 true "" "plot villa-maintained"
+"enlarged" 1.0 0 -2674135 true "" "plot villa-enlarged"
+"managed" 1.0 0 -955883 true "" "plot villa-managed"
+"abandonned" 1.0 0 -6459832 true "" "plot villa-abandonned"
+
+PLOT
+930
+296
+1130
+446
+Villa : Moyenne des terrains
+Ticks
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"moyenne-terrain" 1.0 0 -16777216 true "" "plot mean (list length [listofpatches] of exploitations with [typeOfExploitation = \"villa\"])"
+
+PLOT
+1134
+294
+1334
+444
+Farm : Moyenne des terrains
+Ticks
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean (list length [listofpatches] of exploitations with [typeOfExploitation = \"farm\"])"
+
+TEXTBOX
+1012
+465
+1047
+485
+Villas
+15
+105.0
+1
+
+TEXTBOX
+936
+465
+1006
+503
+Aristocrat\n
+15
+0.0
+1
+
+TEXTBOX
+1053
+465
+1101
+485
+Ferme
+15
+85.0
+1
+
+TEXTBOX
+935
+496
+1048
+516
+Big Landowner\n
+15
+0.0
+1
+
+TEXTBOX
+936
+522
+1001
+542
+Farmers
+15
+136.0
+1
+
+TEXTBOX
+1049
+496
+1082
+516
+Villas
+15
+25.0
+1
+
+TEXTBOX
+1093
+497
+1142
+517
+Farms
+15
+45.0
 1
 
 @#$#@#$#@

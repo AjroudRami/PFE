@@ -50,13 +50,16 @@ end
 
 ;Crée les "owners" et associe un rang à chacun d'eux
 to setupLandOwners
-  create-owners (10)
+  create-owners (20)
+  
   ask owners [
-    set color random(100)
-    set rank item 0 ["farmers" "rich" "aristocrat"]
+    let proportion-owner random(101)
+    ifelse proportion-owner < 30 [set proportion-owner 2] [ifelse proportion-owner < 45 [set proportion-owner 1][set proportion-owner 0]] ; 10% Aristo / 15 % Rich / Rest : Farmers
+    set rank item proportion-owner ["farmers" "rich" "aristocrat"]
+    color-owners
     set numberOfExploitation 0
     if rank = "farmers" [set cerveau-bdi farmer-bdi]
-    show cerveau-bdi
+    ;show cerveau-bdi
     
     set listExploitation []
   ]
@@ -148,16 +151,17 @@ to create-exploitation [lOwner]
       set shape "house"
       set listofpatches (list patch-here)
       set symbolicvalue random(4)
-      set color [color] of owner landowner
       set totalproduction 0
       ifelse not-enough-villa? [do-villa][do-farm] 
-      repeat minsizeofland [ enlarge2 listofpatches ]
+      ifelse typeOfExploitation = "farm" [set color [color] of owner lOwner][set color [color-villa] of owner lOwner]
       set notRentable 0
       set totalaccesibility 0
       ask owner lOwner [
           set listExploitation lput myself listExploitation
-          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1] [set villabought villabought + 1 ]
+          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1 ] 
+        [set villabought villabought + 1 ]
       ] ;; fin ask owner
+       repeat minsizeofland [ enlarge2 listofpatches ]
     ] ;; fin sprout
   ] ;; fin ask emplacement
 end

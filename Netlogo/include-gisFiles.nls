@@ -30,8 +30,8 @@ to display-pedo
 end
 
 to coloring-pedo-paysage
-  ask patches with [color != white] [ ;White is the color of tows and Capital
-    if (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value]
+  ask patches with [pcolor != white] [ ;White is the color of tows and Capital
+    ifelse (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value][set exploited true]
   ]
 end
 

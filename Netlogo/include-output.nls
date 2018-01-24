@@ -4,7 +4,8 @@
 
 globals[
 ;Valeurs servant aux stats (Output)
-  createdEx maintained enlarged managed abandonned
+  villa-created villa-maintained villa-enlarged villa-managed villa-abandonned
+  farm-created farm-maintained farm-enlarged farm-managed farm-abandonned
 
   avgSizeC avgSizeM avgSizeA
 
@@ -14,11 +15,17 @@ globals[
 ;Initialise les variables servant aux statistiques
 ;RAPPEL : Une variable non initialisée en Netlogo prend la valeur 0
 to init-stats
-  set createdEx 0
-  set maintained 0
-  set enlarged 0
-  set managed 0
-  set abandonned 0
+  set villa-created 0 
+  set villa-maintained 0 
+  set villa-enlarged 0 
+  set villa-managed 0 
+  set villa-abandonned 0 
+  
+  set farm-created 0 
+  set farm-maintained 0 
+  set farm-enlarged 0 
+  set farm-managed 0 
+  set farm-abandonned 0
 end
 
 ;Calcul pour chaque "LandscapeType" la surface exploitée sur la surface globale
@@ -48,5 +55,6 @@ to stats-maison
     let nmaint exploitations with [age < 291]
     set avgSizeM (sum [length listofpatches] of maint)
     set avgSizeC (sum [length listofpatches] of nmaint)
-    set maintained (count maint)
+    
 end
+
