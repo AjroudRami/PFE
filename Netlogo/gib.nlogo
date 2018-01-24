@@ -21,7 +21,7 @@ owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploit
 ;;LandscapeUnits
 landscapeunits-own [ name location agrologicalpower2 ]
 ;;piece of lands
-patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster]
+patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster pedoValue ]
 ;; agrological power : % d'influence des conditions climatiques
 exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction maxsizeofland minsizeofland totalaccesibility notRentable age]
 ;;Ville et capitale
@@ -159,10 +159,11 @@ to abandon
 
 ;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
-    ifelse show-color? [ set pcolor (15 + (landscapeType * 20))] ;donne la couleur de base des patchs
-    [set pcolor black]
+   recolor-pedo-paysage;; redonne la couleur de base aux patchs
     set exploited false
-    set cluster nobody ]
+    set cluster nobody
+  ]
+
 
   set abandonned abandonned + 1
   set avgSizeA avgSizeA + length listofpatches

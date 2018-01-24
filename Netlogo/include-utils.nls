@@ -75,9 +75,7 @@ to show-color
   ifelse show-color?
   [setupcolorlandscape colorville colorexploitation];true
   [
-    ask patches [
-    set pcolor black
-    ]
+    coloring-pedo-paysage
     colorville
     colorexploitation
   ]  ;false

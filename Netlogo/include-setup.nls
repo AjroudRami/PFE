@@ -55,7 +55,8 @@ to setupLandOwners
     set color random(100)
     set rank item 0 ["farmers" "rich" "aristocrat"]
     set numberOfExploitation 0
-    if rank = "farmers" [import-BDI cerveau-bdi show cerveau-bdi]
+    if rank = "farmers" [set cerveau-bdi farmer-bdi]
+    show cerveau-bdi
     
     set listExploitation []
   ]

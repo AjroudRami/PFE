@@ -3,6 +3,9 @@ extensions [ gis ]
 globals [
  ville-frejus-dataset 
  agglo-frejus-dataset
+  pedo2-dataset
+  min-pedo-value
+  max-pedo-value
 ]
 
 ;fonction qui importe les fichiers raster / shapefile
@@ -11,10 +14,29 @@ to import-shapefile
   
   set agglo-frejus-dataset gis:load-dataset "./shapefile/raster-Agglo-Frejus/Agglos_Frejus_Lbt93.shp"
   set ville-frejus-dataset gis:load-dataset "./shapefile/raster-VilleFrejus/VilleFrejus_Lbt93.shp"
-  
+  set pedo2-dataset gis:load-dataset "shapefile/pedopaysage/pedopayscite2.asc"
   gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of ville-frejus-dataset)
     (gis:envelope-of agglo-frejus-dataset)
-    )
+    (gis:envelope-of pedo2-dataset)  
+  )
+  
+  set min-pedo-value gis:minimum-of pedo2-dataset
+  set max-pedo-value gis:maximum-of pedo2-dataset
+end
+
+to display-pedo
+  gis:apply-raster pedo2-dataset pedoValue
+  coloring-pedo-paysage
+end
+
+to coloring-pedo-paysage
+  ask patches with [color != white] [ ;White is the color of tows and Capital
+    if (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value]
+  ]
+end
+
+to recolor-pedo-paysage
+  if (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value]
 end
 
 ;fonction qui colorie les patches qui interjecte le dessin défini par le dataset
@@ -37,9 +59,11 @@ to doGis
   import-shapefile
   display-ville-frejus
   display-agglo-frejus
+  
   ask patches [ set exploited  false]
   setup-capital
   setup-ville
+  display-pedo
 end
 
 ;Fonction qui place une capitale et l'initialise

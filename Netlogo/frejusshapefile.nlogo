@@ -35,19 +35,12 @@ to setup
   ask patch 15 15 [set pcolor red]
 end
 
-; Drawing polygon data from a shapefile, and optionally loading some
-; of the data into turtles, if label-countries is true
-to display-countries
-  ask country-labels [ die ]
-  gis:set-drawing-color white
-  gis:draw countries-dataset 1
-end
 
 to display-ville-frejus
  ; gis:set-drawing-color green
   ;gis:draw ville-frejus-dataset 1
   ask patches gis:intersecting agglo-frejus-dataset [
-    set pcolor black
+    set pcolor orange
   ]
 
 end
@@ -69,7 +62,7 @@ to display-agglo-frejus
   ;gis:set-drawing-color black
   ;gis:draw agglo-frejus-dataset 1
    ask patches gis:intersecting agglo-frejus-dataset [
-    set pcolor black
+    set pcolor red
   ]
 end
 to display-voies-frejus
@@ -80,11 +73,6 @@ to display-voies-frejus
   ask patches gis:intersecting voies-frejus-dataset [
     set pcolor black
   ]
-end
-
-to display-airports
- gis:set-drawing-color green
-  gis:draw airports-dataset 1
 end
 
 to save-patch-data
@@ -165,40 +153,6 @@ BUTTON
 59
 NIL
 setup\n
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-36
-425
-161
-458
-NIL
-display-countries
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-37
-458
-154
-491
-NIL
-display-airports\n
 NIL
 1
 T
