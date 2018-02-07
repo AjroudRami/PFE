@@ -25,18 +25,18 @@ to import-shapefile
 end
 
 to display-pedo
-  gis:apply-raster pedo2-dataset pedoValue
+  gis:apply-raster pedo2-dataset pedo-paysage-Value
   coloring-pedo-paysage
 end
 
 to coloring-pedo-paysage
   ask patches with [pcolor != white] [ ;White is the color of tows and Capital
-    ifelse (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value][set exploited true]
+    ifelse (pedo-paysage-Value <= 0) or (pedo-paysage-Value >= 0) [ set pcolor scale-color green pedo-paysage-Value min-pedo-value max-pedo-value][set is-exploited true]
   ]
 end
 
 to recolor-pedo-paysage
-  if (pedoValue <= 0) or (pedoValue >= 0) [ set pcolor scale-color green pedoValue min-pedo-value max-pedo-value]
+  if (pedo-paysage-Value <= 0) or (pedo-paysage-Value >= 0) [ set pcolor scale-color green pedo-paysage-Value min-pedo-value max-pedo-value]
 end
 
 ;fonction qui colorie les patches qui interjecte le dessin défini par le dataset
@@ -60,7 +60,7 @@ to doGis
   display-ville-frejus
   display-agglo-frejus
   
-  ask patches [ set exploited  false]
+  ask patches [ set is-exploited  false]
   setup-capital
   setup-ville
   display-pedo
@@ -79,10 +79,10 @@ to setup-capital ; color = red
     set listofpatch location
       ;Pour faire un carré d'environ 50ha
     repeat 3 [
-        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [exploited = false]
+        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [is-exploited = false]
         ask x[
           set pcolor white
-          set exploited true
+          set is-exploited true
         ]
         set listofpatch (patch-set listofpatch  x)
         
@@ -105,10 +105,10 @@ to setup-ville ; color = orange
     set listofpatch location
       ;Pour faire un carré d'environ 50ha
     repeat 1 [
-        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [exploited = false]
+        let x (patch-set ([neighbors] of (patch-set listofpatch))) with [is-exploited = false]
         ask x[
           set pcolor white
-          set exploited true
+          set is-exploited true
         ]
         set listofpatch (patch-set listofpatch  x)
         

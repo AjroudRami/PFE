@@ -5,7 +5,13 @@ __includes["include-output.nls" "include-setup.nls" "include-utils.nls" "include
 
 ;Définition des variables globales du modèle
 globals[
-
+  duree-simulation
+  villa
+  farm
+  aristocrat
+  rich
+  farmer
+  CapitalInfluenceRadius
 ]
 
 ;Définition des espèces d'agents
@@ -16,20 +22,17 @@ breed [towns town]
 
 ;Définition des attributs des différents agents
 
-;; Les 3 derniers attributs sont des % de perceptions de ces differents domaines
-owners-own [rank ecopower money oldmoney radius maxNumberExploit numberOfExploitation minNumberVilla listExploitation landproductivity landmanagement macrocontext farmbought villabought cerveau-bdi color-villa ]
+
+owners-own [rank economicPower money oldmoney radiusOfView maxNumberExploitation numberOfExploitation minNumberVilla listExploitation farmbought villabought cerveau-bdi color-villa ]
 ;;LandscapeUnits
-landscapeunits-own [ name location agrologicalpower2 ]
+landscapeunits-own [ name location ]
 ;;piece of lands
-patches-own [landscapeType haveTools agrologicalPower exploited yearsExploited production accessibility climat cluster pedoValue ]
-;; agrological power : % d'influence des conditions climatiques
+patches-own [landscapeType haveTools agrologicalPower is-exploited yearsExploited production accessibility climat pedo-paysage-Value ]
+;; Exploitations
 exploitations-own[landowner typeOfExploitation listofpatches symbolicvalue totalproduction maxsizeofland minsizeofland totalaccesibility notRentable age]
 ;;Ville et capitale
 towns-own [ location taille isCapital listofpatch ]
 
-;;ODD COMMENTAIRE
-;;Output 29 & 30 ????
-;;t1 : 22->24 ??!!! Aucun modele de cout difficile de faire ça
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;FONCTIONS PRINCIPALES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -42,10 +45,11 @@ end
 
 ;Fonction qui appelle les setups de l'environnement et des différentes entités
 to setup
+  constantes-setup
+
   setupTown
   setup-profit
   setupLandscapeType
-  ;setupcolorlandscape
   setupClimatique
 
   setupLandOwners
@@ -64,9 +68,10 @@ end
 ;Fonction qui fait avancer le monde
 to go
   init-stats
-  if (ticks >= 300) [
+  if (ticks >= duree-simulation) [
     stats-maison ;include-output.nls
-    stop]
+    stop
+  ]
 
   stuffBeforeOwnersCalcul
   calculHigherEqualLowerProfit
@@ -74,7 +79,6 @@ to go
   increment-years-exploited ;include-uils
   increment-age-exploitations ;include-uils
   changeClimat ; include-uils
-
   stats-surface
 
   tick
@@ -97,14 +101,14 @@ to stuffBeforeOwnersCalcul
     ;; T1 : 15
 
     ;set accessibilité d'une piece of land la distance qui la sépare de la ville la plus proche
-    if exploited [ set _neareast min-one-of towns [distance myself] set accessibility distance _neareast]
+    if is-exploited [ set _neareast min-one-of towns [distance myself] set accessibility distance _neareast]
   ]
 
   ;Pour chaque exploitations
   ask exploitations[
     ;;T1 : 14
     set totalproduction (sum [production] of  (patch-set listofpatches)) ;Sa production = somme des production de ses pice of lan
-    if typeOfExploitation = "villa" [bonus-villa] ;si l'exploitation est une villa on applique son bonus à son total de production
+    if typeOfExploitation = villa [bonus-villa] ;si l'exploitation est une villa on applique son bonus à son total de production
     ;; T1 : 16 != 17 -> On calcule la distance par rapport à la CAPITALE et non plus aux villes
     set totalaccesibility (mean [accessibility] of (patch-set listofpatches));
   ]
@@ -112,12 +116,11 @@ to stuffBeforeOwnersCalcul
   ;Pour chaque owner
  ask owners [
     set oldmoney money;On set son argent à t-1
-    set ecopower (oldmoney - money)
+    set economicPower (oldmoney - money)
     set money (sum [(2 * totalproduction) - totalaccesibility] of turtle-set listExploitation); set profit à t now.
   ]
 
-  let _freepol patches with [exploited = false]
-
+  let _freepol patches with [is-exploited = false]
 end
 
 
@@ -136,7 +139,7 @@ end
 ;crée une exploitation si on peut encore en créer
 to creation
   let tmp [numberOfExploitation] of myself
-  let maxx [maxNumberExploit] of myself
+  let maxx [maxNumberExploitation] of myself
   if tmp < maxx [
     chooseRentableExploitationAndExpand
   ]
@@ -153,7 +156,7 @@ to abandon
 
   ;Si un aristocrat abandonne sa villa qui est sous l'influence de la capitale il DOIT en recréer une proche de la capitale
   ;sinon on créer simplement une exploitation supplémentaire
-  ifelse _r = "aristocrat" and _t ="villa" and distance _cap < 27  [ create-near-capital ][ creation]
+  ifelse _r = aristocrat and _t = villa and distance _cap < CapitalInfluenceRadius  [ create-near-capital ][ creation]
 
   ask owner _nameOwner [
     set numberOfexploitation numberofExploitation - 1
@@ -163,8 +166,7 @@ to abandon
 ;raz des pieces of land que l'exploitation contenait
  ask (patch-set listofpatches) [
    recolor-pedo-paysage;; redonne la couleur de base aux patchs
-    set exploited false
-    set cluster nobody
+    set is-exploited false
   ]
 
 
@@ -175,7 +177,7 @@ end
 ;Agrandit un terrain d'une parcelle contigu au terrain de l'exploitation appellante
 to enlarge2 [listpatches]
   ;tous les patches collés au terrain de l'exploitation
-  let _watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [exploited = false]
+  let _watchterrain (patch-set [neighbors4] of (patch-set listpatches)) with [is-exploited = false]
   let _better _watchterrain with [haveTools]
   let _parcelle patch 0 0
   if ( count _watchterrain) > 0 [
@@ -185,7 +187,7 @@ to enlarge2 [listpatches]
   ;ajoute la piece of land au terrain de l'exploitation
   set listofpatches sentence listpatches (sort _parcelle)
   ask _parcelle [
-      set exploited true
+      set is-exploited true
       set pcolor [color] of myself
     ]
   ]
@@ -202,7 +204,7 @@ to chooseRentableExploitationAndExpand
 
   ;;Necessary to enlarge terrain
 
-  let _probablygood patches in-radius ([radius] of myself) with [exploited = false]
+  let _probablygood patches in-radius ([radiusOfView] of myself) with [is-exploited = false]
   let _better _probablygood with [haveTools]
   let _startcluster patch 0 0 ;initialisation
   if(count _probablygood > 0) [
@@ -213,7 +215,7 @@ to chooseRentableExploitationAndExpand
     ;foreach terrain [set exploited true]
     ask _startcluster [
       set pcolor [color] of owner _nameOwner
-      set exploited true
+      set is-exploited true
       sprout-exploitations 1 [
         set landowner _nameOwner
         set shape "house"
@@ -227,7 +229,7 @@ to chooseRentableExploitationAndExpand
         ;sinon ce sera une ferme
         ifelse not-enough-villa? [do-villa][do-farm]
         ;On regarde si l'exploitation nouvellement crée est High/Low rentable
-        ifelse typeOfExploitation = "farm" [set _profit profit-farm set farm-created farm-created + 1 set color [color] of owner landowner]
+        ifelse typeOfExploitation = farm [set _profit profit-farm set farm-created farm-created + 1 set color [color] of owner landowner]
         [set _profit profit-villa set villa-created villa-created + 1 set color [color-villa] of owner landowner]
         repeat minsizeofland [ enlarge2 listofpatches ]
         set totalproduction (sum [production] of  (patch-set listofpatches))
@@ -241,7 +243,7 @@ to chooseRentableExploitationAndExpand
       ] ;fin sprout
     ] ; fin startcluster
     let _numb [numberOfExploitation] of owner _nameOwner
-    let _maxn [maxNumberExploit] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
+    let _maxn [maxNumberExploitation] of owner _nameOwner ;+1 pour les fermiers leur permettant d'installer une autre exploitation avant d'abandonner la leur
     ;goodprofit est le profit que rapporte cette nouvelle exploitation
     ;_profit est le seuil de rentabilité d'une farm ou d'une villa
     if (_goodprofit > _profit) and (_numb < _maxn)  [chooseRentableExploitationAndExpand]
@@ -253,8 +255,8 @@ end
 ;call by go func
 to calculHigherEqualLowerProfit
   ask owners [
-    ifelse rank = "aristocrat" [ cmd1 ]
-    [ifelse rank = "rich" [cmd2]
+    ifelse rank = aristocrat [ cmd1 ]
+    [ifelse rank = rich [cmd2]
     [cmd3-bdi]] ;;farmers
   ]
 end
@@ -316,7 +318,7 @@ to checkProfitDecreasedFarmer ;Baisse de profit
   let _profit 0
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
       ifelse (totalproduction - totalaccesibility) > _profit [ maintain set farm-maintained farm-maintained + 1]
       [ ifelse notRentable > 1 [ abandon set farm-abandonned farm-abandonned + 1] [set notRentable (notRentable + 1)]
     ]
@@ -329,7 +331,7 @@ to checkProfitEquivalentFarmer ; Profit Equivalent
   let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
       ifelse (totalproduction - totalaccesibility) > _profit [ maintain set farm-maintained farm-maintained + 1]
       [ ifelse notRentable > 1 [ abandon set farm-abandonned farm-abandonned + 1] [set notRentable (notRentable + 1)]
     ]
@@ -342,7 +344,7 @@ to checkProfitIncreasedFarmer ;Augmentation Profit
   let _profit 0
 foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
       if (totalproduction - totalaccesibility) > _profit [ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches set farm-enlarged farm-enlarged + 1][maintain set farm-maintained farm-maintained + 1]]
     ]
   ]
@@ -355,9 +357,9 @@ to checkProfitDecreased ; Baisse de profit
   let _profit 0
   foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) > _profit [maintain ifelse typeOfExploitation = "farm"[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]]
-      [ ifelse notRentable > 1 [ abandon ifelse typeOfExploitation = "farm"[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]] [set notRentable (notRentable + 1)]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) > _profit [maintain ifelse typeOfExploitation = farm[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]]
+      [ ifelse notRentable > 1 [ abandon ifelse typeOfExploitation = farm[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]] [set notRentable (notRentable + 1)]
     ]
   ]
   ]
@@ -368,9 +370,9 @@ to checkProfitEquivalent ; Profit Equivalent
   let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
       ifelse (totalproduction - totalaccesibility) > _profit [ maintain creation ]
-      [ ifelse symbolicvalue > 0 [ maintain ifelse typeOfExploitation = "farm"[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]] [abandon ifelse typeOfExploitation = "farm"[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]]
+      [ ifelse symbolicvalue > 0 [ maintain ifelse typeOfExploitation = farm[set farm-maintained farm-maintained + 1][set villa-maintained villa-maintained + 1]] [abandon ifelse typeOfExploitation = farm[set farm-abandonned farm-abandonned + 1][set villa-abandonned villa-abandonned + 1]]
     ]
   ]
   ]
@@ -381,9 +383,9 @@ to checkProfitIncreased ;Augmentation du profit
   let _profit 0
    foreach listExploitation [
     [exploit] -> ask exploit [
-      ifelse typeOfExploitation = "farm" [set _profit profit-farm] [set _profit profit-villa]
-      ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve ifelse typeOfExploitation = "farm"[set farm-managed farm-managed + 1][set villa-managed villa-managed + 1]]
-      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches ifelse typeOfExploitation = "farm"[set farm-enlarged farm-enlarged + 1][set villa-enlarged villa-enlarged + 1] ][creation ]]
+      ifelse typeOfExploitation = farm [set _profit profit-farm] [set _profit profit-villa]
+      ifelse (totalproduction - totalaccesibility) < _profit [ maintain improve ifelse typeOfExploitation = farm[set farm-managed farm-managed + 1][set villa-managed villa-managed + 1]]
+      [ ifelse length listofpatches < maxsizeofland [enlarge2 listofpatches ifelse typeOfExploitation = farm[set farm-enlarged farm-enlarged + 1][set villa-enlarged villa-enlarged + 1] ][creation ]]
     ]
   ]
 end
@@ -485,10 +487,10 @@ PENS
 "" 1.0 0 -11085214 true "" "ask owners [\n create-temporary-plot-pen (word who)\n set-plot-pen-color color\n plotxy ticks money\n ]"
 
 BUTTON
-75
-303
-146
-336
+128
+216
+199
+249
 NIL
 go
 T
@@ -567,10 +569,10 @@ TEXTBOX
 1
 
 BUTTON
-72
+9
+216
+92
 249
-155
-282
 BeforeGo
 clear\nload-climatique\nsetup\ntest
 NIL
@@ -584,12 +586,12 @@ NIL
 1
 
 BUTTON
-70
-128
-135
-161
+72
+134
+137
+167
 NIL
-doBDI
+doDBI
 NIL
 1
 T
@@ -616,8 +618,8 @@ true
 true
 "" ""
 PENS
-"default" 1.0 0 -2674135 true "" "plot ((count exploitations with [typeOfExploitation = \"villa\"]) / count exploitations) * 100"
-"pen-1" 1.0 0 -14070903 true "" "plot ((count exploitations with [typeOfExploitation = \"farm\"]) / count exploitations) * 100"
+"% villa" 1.0 0 -2674135 true "" "plot ((count exploitations with [typeOfExploitation = \"villa\"]) / count exploitations) * 100"
+"%ferme" 1.0 0 -14070903 true "" "plot ((count exploitations with [typeOfExploitation = \"farm\"]) / count exploitations) * 100"
 
 PLOT
 930
@@ -637,7 +639,7 @@ true
 PENS
 "Aristocrat" 1.0 0 -13791810 true "" "plot ((count owners with [rank = \"aristocrat\"]) * 100 / count owners) "
 "Big landowner" 1.0 0 -723837 true "" "plot ((count owners with [rank = \"rich\"])  * 100 / count owners)"
-"Farmers" 1.0 0 -1664597 true "" "plot ((count owners with [rank = \"farmers\"]) * 100 / count owners) "
+"Farmers" 1.0 0 -1664597 true "" "plot ((count owners with [rank = \"farmer\"]) * 100 / count owners) "
 
 PLOT
 1126
@@ -792,35 +794,40 @@ Farms
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+Cette simulation montre le comportement des propriétaires fonciers dans le sud de la Gaulle à l'époque romaine
 
 ## ENTITY DETAILS
 
 * **Landowners** _(Turtle breed : owners)_
-    * **rank :** Rang social (Farmier/Riche/Aristocrate)
-    * **money :** Pouvoir économique de départ
-    * **oldmoney :** Revenu à t-1
-    * **radius :** Rayon de recherche de nouvelle exploitation en fonction du rang
-    * **numberOfExploitation :** Nombre d'exploitation actuelle
-    * **listExploitation :** Liste contenant les exploitations
-    * **landproductivity :** Total de production de toutes les exploitations
-    * **landmanagement :** % d'impact sur l'owner concernant les aménagements établie d'un terrain 
-    * **macrocontext :** % d'influence du macro-eco-context sur l'owner
-  
+    **rank :** Rang social (Farmier/Riche/Aristocrate)
+    **money :** Pouvoir économique de départ
+    **oldmoney :** Revenu à t-1
+    **radiusOfView :** Rayon de recherche de nouvelle exploitation en fonction du rang
+    **numberOfExploitation :** Nombre d'exploitation actuelle
+    **listExploitation :** Liste contenant les exploitations
+
+    **landproductivity :** Total de production de toutes les exploitations
+    **maxNumberExploitation : ** Nombre maximum d'exploitation que ce propriétaire peut avoir
+    **minNumberVilla :** Nombre minimum de villa que le propriétaire doit mantenir.
+    **farmbought :** Nombre de fermes achetées
+    **villabought :** Nombre de villas achetées
+    **cerveau-bdi :** Definition de l'agent dbi
+    **color-villa :** Couleur que l'agent donne à ses propriétés
+
 * **Landscape Unit** _(Turtle breed : landscapeunits)_
     * **location :** Contient tout les patchs étant de ce type d'unité
-    * **agrologicalpower2 :** Contient le pouvoir agricole de cette unité
     * **name :** Contient le nom de l'unité  	
 
 * **Piece of land** _(Patches)_
     * **landscapeType :** Type de terrain
     * **haveTools :** Boolean -> true si il y a des aménagement agricole, false sinon
     * **agrologicalPower :** Pouvoir agricole du terrain dépend du landscapeType
-    * **exploited :** Boolean -> true si appartient à une exploitation non abandonnée, false sinon
+    * **is-exploited :** Boolean -> true si appartient à une exploitation non abandonnée, false sinon
     * **yearsExploited :** Nombre d'années consécutive exploité
     * **production :** Total de production fourni par ce terrain
-    * **accessibility:** Valeur représentant l'accesibilité de ce terrain
-    * **climat:** Climat touchant le terrain representé par une valeur (voir tab climatique)
+    * **accessibility :** Valeur représentant l'accesibilité de ce terrain
+    * **climat :** Climat touchant le terrain representé par une valeur (voir tab climatique)
+    * **pedo-paysage-Value :** Valeur apportée par l'import des valeurs de la carte GIS
 
   * **Exploitation** _(Turtle breed : exploitations)_
     * **landowner :** Nom de l'owner de l'exploitation
@@ -829,41 +836,38 @@ Farms
     * **symbolicvalue :** Valeurs symbolique comprise dans l'intervalle [0,4].
     * **totalproduction :** Somme des production de chaque piece of land appartenant à l'exploitation
     * **sizeofland :** Nombre de piece of lands contenus dans l'exploitation
+    * **maxsizeofland :** Limite maximale du terrain que peut occuper l'exploitation
+    * **minsizeofland :** Limite minimale du terrain que peut occuper l'exploitation
     * **totalaccesibility :** Somme de l'accessibilité de chaque piece of land contenus dans l'exploitation
+    * **notRentable :** true si l'exploitation n'a pas été rentable au tick précédent 
+    * **age :** Age de l'exploitation
 
 * **Town**
+    * **location :** Patch d'origine de la ville
+    * **taille :**  Rayon sur lequelle s'étale la ville
+    * **isCapital :** true si la ville est une capitale
+    * **listofpatch :** Contient la liste des patches sur lesquels s'étend la ville
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+Les propriétaires fonciers estiment si chacune de leurs exploitations sont rentables. Et vont en conséquences choisir si il l'abandonne, décide de la maintenir, de l'aménager ou d'en créer une nouvelle.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Pour une utilisation simplifiée, il suffit d'appuyer sur les boutons "BeforeGo" puis "Go".
+Sinon on peut appuyer sur les boutons en partant du haut pour initialiser chaque étape pas à pas.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+Le modèle est toujours en cours d'évolution. A l'heure actuelle on peut remarquer que l'influence de la capitale joue beaucoup sur les déplacements de populations.
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+Cette simulation repose sur le modèle ODD fourni dans le cadre du projet d'étude "ModelAndSet".
+
+Frédérique Bertoncello
+Célia Da Costa Pereira
+Andrea Tettamanzi
 @#$#@#$#@
 default
 true

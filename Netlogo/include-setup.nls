@@ -2,6 +2,33 @@
 ;nécessaire au setup du modèle
 
 ;;; All needed T0 functions
+globals [
+ proba-Aristocrat
+ proba-Rich
+ proba-Farmer 
+ money-Aristocrat
+ money-Rich
+ money-Farmer
+ minimumExploitation-Aristocrat
+ minimumExploitation-Rich
+ minimumExploitation-Farmer
+ rov-Farmer
+ rov-Rich
+ rov-Aristocrat
+ maxVilla-Farmer
+ maxVilla-Rich
+ maxVilla-Aristocrat
+]
+
+to constantes-setup
+  set duree-simulation 300
+  set villa "villa"
+  set farm "farm"
+  set aristocrat "aristocrat"
+  set rich "rich"
+  set farmer "farmer"
+  set CapitalInfluenceRadius 27
+end
 
 ;Fonction qui définit la valeur du seuil High/Low profit
 to setup-profit
@@ -19,7 +46,7 @@ to setupLandscapeType
   ask patches [
     set haveTools false
     set landscapeType random(5)
-    set cluster nobody
+
   ]
 
   ;;Optionnnel sert à faire des agrégat de région
@@ -51,38 +78,43 @@ end
 ;Crée les "owners" et associe un rang à chacun d'eux
 to setupLandOwners
   create-owners (20)
-  
+  set proba-Aristocrat 75 ;10
+  set proba-Rich 95 ; 25
+  set proba-Farmer 101 ;101
   ask owners [
-    let proportion-owner random(101)
-    ifelse proportion-owner < 30 [set proportion-owner 2] [ifelse proportion-owner < 45 [set proportion-owner 1][set proportion-owner 0]] ; 10% Aristo / 15 % Rich / Rest : Farmers
-    set rank item proportion-owner ["farmers" "rich" "aristocrat"]
+    let type-owner random(101)
+    ifelse type-owner < proba-Aristocrat [set type-owner 2] [ifelse type-owner < proba-Rich [set type-owner 1][set type-owner 0]] ;
+    set rank item type-owner ["farmer" "rich" "aristocrat"]
     color-owners
     set numberOfExploitation 0
-    if rank = "farmers" [set cerveau-bdi farmer-bdi]
+    if rank = farmer [set cerveau-bdi farmer-DBI]
     ;show cerveau-bdi
     
     set listExploitation []
   ]
 end
-;;FUSION
+
 ;;Associe à chaque owners : son pouvoir éco, son nombre max d'établissements, son rayon d'action (selon son rang)
 to setupmoney
+  set money-Farmer 1000
+  set money-Rich 3000
+  set money-Aristocrat 5000
+  
   ask owners[
-  ifelse rank = "farmers" [ set money random(1000) set maxNumberExploit 1 set radius 1]
-  [ifelse rank = "rich" [set money random(3000) set maxNumberExploit 3 set radius 20] ;; 20 patch = 100ha
-    [set money random(5000) set maxNumberExploit 6 set radius max-pycor]] ;;aristocrats
+  ifelse rank = farmer [ set money random(money-Farmer) set maxNumberExploitation 1 set radiusOfView 1]
+  [ifelse rank = rich [set money random(money-Rich) set maxNumberExploitation 3 set radiusOfView 20] ;; 20 patch = 100ha
+    [set money random(money-Aristocrat) set maxNumberExploitation 6 set radiusOfView max-pycor]] ;;aristocrats
   ]
 end
-;;FUSION
+
 ;Associe un nombre aléatoire d'exploitations à chaque owners et
 ;les crée aléaoirement dans le monde
-to setupExploitationPerOwners
+to setupExploitationPerOwners  
   ask owners [
-  ifelse rank = "farmers" [ set numberOfExploitation (random(2) + 1) set minNumberVilla 0]
-  [ifelse rank = "rich" [set numberOfExploitation (random(4) + 1) set minNumberVilla 1]
-  [set numberOfExploitation (random(4) + 1) set minNumberVilla 3]]
-
-  repeat maxNumberExploit [create-exploitation who]
+    ifelse rank = farmer [ set numberOfExploitation (random(2) + 1) set minNumberVilla 0]
+    [ifelse rank = rich [set numberOfExploitation (random(4) + 1) set minNumberVilla 1]
+      [set numberOfExploitation (random(4) + 1) set minNumberVilla 3]]
+    repeat maxNumberExploitation [create-exploitation who]
   ]
  end
 
@@ -91,13 +123,13 @@ to setupSymbolic
   ask exploitations[
     let _owner owner landowner
     let _rank [rank] of _owner
-    ifelse  _rank = "farmer" [ set symbolicvalue 3 ]
+    ifelse  _rank = farmer [ set symbolicvalue 3 ]
     [set symbolicvalue random(4)]
     
-    if distance one-of towns with [isCapital] < 27 [set symbolicvalue symbolicvalue + 1]
+    if distance one-of towns with [isCapital] < CapitalInfluenceRadius [set symbolicvalue symbolicvalue + 1]
   ]
 end
-;;FUSION
+
 ;Associe aléatoirement la présence de structures agricoles sur les patches (pieces of lands) des exploitations
 to setupAgricultureStructure
   ask exploitations[
@@ -106,7 +138,7 @@ to setupAgricultureStructure
     ]
   ]
 end
-;;FUSION
+
 ;Associe un nombre d'années aléatoire d'exploitation aux patches (pieces of lands) des exploitations  
 to setupYearsOfExploitation
   ask exploitations[
@@ -131,20 +163,20 @@ end
 to create-exploitation [lOwner]
   
   let _capital one-of towns with [isCapital]
-  let _near 27 ;rayon d'influence (en patch) de la capitale
-  let _emplacementDispo patches with [distance _capital < _near and exploited = false]
+  let _near CapitalInfluenceRadius ;rayon d'influence (en patch) de la capitale
+  let _emplacementDispo patches with [distance _capital < _near and is-exploited = false]
   let _emplacement one-of _emplacementDispo
-  let _anywhere one-of patches with [exploited = false]
+  let _anywhere one-of patches with [is-exploited = false]
   let _r [rank] of owner lOwner
   
   ;Pour les aristocrats qui n'ont pas d'exploitation dans le rayon d'influence de la capitale
   ;Vont donc choisir un emplacement proce de la capital
-  ifelse _r = "aristocrat" [ 
-    let _exploit count (turtle-set listExploitation) with [distance one-of (towns with [isCapital]) < 27]
+  ifelse _r = aristocrat [ 
+    let _exploit count (turtle-set listExploitation) with [distance one-of (towns with [isCapital]) < CapitalInfluenceRadius]
     if _exploit != 0 [set _emplacement _anywhere]];true 
  [set _emplacement _anywhere] ;false
   ask _emplacement [
-    set exploited true
+    set is-exploited true
     set pcolor black
     sprout-exploitations 1 [
       set landowner lOwner
@@ -153,12 +185,12 @@ to create-exploitation [lOwner]
       set symbolicvalue random(4)
       set totalproduction 0
       ifelse not-enough-villa? [do-villa][do-farm] 
-      ifelse typeOfExploitation = "farm" [set color [color] of owner lOwner][set color [color-villa] of owner lOwner]
+      ifelse typeOfExploitation = farm [set color [color] of owner lOwner][set color [color-villa] of owner lOwner]
       set notRentable 0
       set totalaccesibility 0
       ask owner lOwner [
           set listExploitation lput myself listExploitation
-          ifelse ([typeOfExploitation] of myself) = "farm" [set farmbought farmbought + 1 ] 
+          ifelse ([typeOfExploitation] of myself) = farm [set farmbought farmbought + 1 ] 
         [set villabought villabought + 1 ]
       ] ;; fin ask owner
        repeat minsizeofland [ enlarge2 listofpatches ]
@@ -168,81 +200,13 @@ end
 
 ;Fonction faisant remontée des infos de debug
 to test
-  ;show [who] of owners with [rank = "aristocrat"]
+  ;show [who] of owners with [rank = aristocrat]
   let _l []
-  ask exploitations with [typeOfExploitation = "villa"] [ 
+  ask exploitations with [typeOfExploitation = villa] [ 
     let _r [rank] of owner landowner
-    if distance one-of (towns with [isCapital]) < 27  and _r = "aristocrat"[set _l lput landowner _l]] 
- ; ask towns with [isCapital] [ask patches in-radius 27 [set pcolor red]]
-  show length _l
-  ask owners[ if count (turtle-set listExploitation) with [typeOfExploitation = "villa"] > maxNumberExploit [show who]]
+    if distance one-of (towns with [isCapital]) < CapitalInfluenceRadius  and _r = aristocrat[set _l lput landowner _l]] 
+ ; ask towns with [isCapital] [ask patches in-radius CapitalInfluenceRadius [set pcolor red]] affiche le rayon d'influence de la capitale
+ 
 end
 
 
-;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;Visuel;;;;;;
-;;;;;;;;;;;;;;;;;;;;
-
-
-;Fonction qui associe une couleur aux patches selon leur "LandscapeType"
-to setupcolorlandscape
-  ask patches[
-    set pcolor (15 + (landscapeType * 20))
-  ]
-end
-
-;Mise à zéro d'un owner
-to zero-owner
-  set rank "" ;String
-  set ecopower 0 ; int
-  set money 0 ; int
-  set oldmoney 0 ;int
-  set radius 0 ; int
-  set maxNumberExploit 0 ; int
-  set numberOfExploitation 0 ; int
-  set listExploitation [] ;Netlogo list
-  set landproductivity 0 ;int
-  set landmanagement 0; int ?
-  set macrocontext 0; int ? 
-  set farmbought 0; int
-  set villabought 0 ; int
-end
-
-;Mise à zéro d'une exploitation
-to zero-exploitation
-  set landowner 0 ; Int id of owner
-  set typeOfExploitation "" ; String farm or villa
-  set listofpatches [] ; Netlogo List containing patches
-  set symbolicvalue 0 ; int
-  set totalproduction 0 ; int
-  set maxsizeofland 0 ; int length of listofpatches
-  set minsizeofland 2 ; int minimum size of this type of expoloitation ( Farm = 2 , Villa = 10)
-  set totalaccesibility 0 ; int
-  set notRentable 0 ; int Years of being not rentable
-  set age 0 ; int
-end
-
-;Mise à zéro d'une landscape unit (UNUSED)
-to zero-landscapeUnit
-  set name "" ; String
-  set location 0 ; ??
-  set agrologicalpower2 0; int
-end
-
-;Mise à zéro d'une piece of land
-to zero-piece-of-land
-  set landscapeType 0 ; Int 
-  set haveTools false ; Boolean
-  set agrologicalPower 0 ; Int
-  set exploited false ; Boolean
-  set yearsExploited 0 ; int
-  set production 0 ; int
-  set accessibility 0 ; int
-  set climat 0 ; int
-  set cluster 0 ; int Id of a patch
-end
-
-;Mise à zéro d'une town (UNUSED)
-to zero-town
-  
-end

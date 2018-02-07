@@ -9,16 +9,22 @@ globals[
   ;valeur qui délimite High Profit from Low Profit
   profit-farm
   profit-villa
+  
+  benefice-tools
 ]
 
 ;;Utils
+
+;Impact du temps sur la production des terrains
 to impactYearsExploitation
   let impact (list 0 -10 -20 -10 -20)
   set production production + (round(yearsExploited / 5) * (item landscapetype impact))
 end
 
+;Impact des aménagements agricoles sur la production des terrains
 to impactAgriculturalStructure
-  if haveTools [set production production + 20]
+  set benefice-tools 20
+  if haveTools [set production production + benefice-tools]
 end
 
 ;Ajoute des structures sur les piece of land qui n'en n'ont pas
@@ -45,7 +51,7 @@ end
 ;d'exploitation des patches (piece of land)
 to increment-years-exploited
   ask patches [
-    ifelse exploited [set yearsExploited (yearsExploited + 1)]
+    ifelse is-exploited [set yearsExploited (yearsExploited + 1)]
     [if yearsExploited > 0 [ set yearsExploited (yearsExploited - 1)]]
   ]
 end
@@ -68,28 +74,6 @@ let file "climatique.txt"
    ]
      ;user-message "Climatique load complete..."
      file-close
-end
-
-;;Called by owners ;Set color of farm
-to color-owners
-  ifelse rank = "aristocrat" [set color [100 255 255] set color-villa [20 0 239] ][ifelse rank = "rich" [set color [255 255 102] set color-villa [255 10 0]] [set color [255 70 180]]]
-end
-
-
-
-;colorie les villes
-to colorville
-  ask towns[
-    ask (patch-set listofpatch) [set pcolor white] 
-  ]
-end
-
-;colorie les exploitations
-to colorexploitation
-  ask exploitations[
-    ask (patch-set listofpatches) [set pcolor [color] of owner [landowner] of myself]
-    ask patch-here [set pcolor black]
-  ]
 end
 
 
@@ -125,12 +109,12 @@ end
 to create-near-capital
   let _capital one-of towns with [isCapital]
   let _near 27
-  let _emplacementDispo patches with [distance _capital < _near and exploited = false]
+  let _emplacementDispo patches with [distance _capital < _near and is-exploited = false]
   let _emplacement one-of _emplacementDispo
   let _own [landowner] of self
   
   ask _emplacement [
-    set exploited true
+    set is-exploited true
     set pcolor black
     sprout-exploitations 1 [
       set landowner _own
@@ -150,3 +134,27 @@ to create-near-capital
     ] ;; fin sprout
   ] ;; fin ask emplacement
 end
+
+;;;;;;;;;;;;
+;;;Visuel;;;
+;;;;;;;;;;;;
+;;Called by owners ;Set color of farm
+to color-owners
+  ifelse rank = "aristocrat" [set color [100 255 255] set color-villa [20 0 239] ][ifelse rank = "rich" [set color [255 255 102] set color-villa [255 10 0]] [set color [255 70 180]]]
+end
+
+;colorie les villes
+to colorville
+  ask towns[
+    ask (patch-set listofpatch) [set pcolor white] 
+  ]
+end
+
+;colorie les exploitations
+to colorexploitation
+  ask exploitations[
+    ask (patch-set listofpatches) [set pcolor [color] of owner [landowner] of myself]
+    ask patch-here [set pcolor black]
+  ]
+end
+

@@ -1,22 +1,23 @@
 extensions [dbi]
 globals [agent]
 
-to doBDI
-setupBDI
-showAgent
-showAgentGoals  
+to doDBI
+  setupDBI
+  showAgent
+  showAgentGoals  
 end
 
-to setupBDI
-  importBDI
+to setupDBI
+  importDBI
   ;formulas
 end
 
-to importBDI
+to importDBI
+  ;Remplacer par le chemin absolu jusqu'au fichier .apl contenant la définition de l'agent DBI
   set agent dbi:DBIAgent-import "C:\\Users\\Jeremy\\IdeaProjects\\PFE\\extension\\src\\main\\res\\farmer.apl"
 end
 
-to-report farmer-bdi
+to-report farmer-DBI
   report dbi:DBIAgent-import "C:\\Users\\Jeremy\\IdeaProjects\\PFE\\extension\\src\\main\\res\\farmer.apl"
 end
 
